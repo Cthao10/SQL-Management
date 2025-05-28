@@ -1,25 +1,37 @@
-<?php include 'view/header.php'; ?>
-<main class="container mt-4">
-    <nav>
-        <h2>Administrators</h2>
-        <ul>
-            <li><a href="manage_products.php">Manage Products</a></li>
-            <li><a href="manage_technicians.php">Manage Technicians</a></li>
-            <li><a href="manage_customers.php">Manage Customers</a></li>
-            <li><a href="under_construction.php">Create Incident</a></li>
-            <li><a href="under_construction.php">Assign Incident</a></li>
-            <li><a href="under_construction.php">Display Incidents</a></li>
-        </ul>
+<?php
+require_once(__DIR__ . '/../view/header.php');
+require_once(__DIR__ . '/../models/database.php');
 
-        <h2>Technicians</h2>
-        <ul>
-            <li><a href="under_construction.php">Update Incident</a></li>
-        </ul>
+// Get products
+$query = 'SELECT * FROM products ORDER BY name';
+$statement = $db->prepare($query);
+$statement->execute();
+$products = $statement->fetchAll();
+$statement->closeCursor();
+?>
 
-        <h2>Customers</h2>
-        <ul>
-            <li><a href="under_construction.php">Register Product</a></li>
-        </ul>
-    </nav>
-</main>
-<?php include 'view/footer.php'; ?>
+<div class="container mt-5">
+    <h2>Product Manager</h2>
+    <table class="table table-bordered mt-3">
+        <thead>
+        <tr>
+            <th>Product Code</th>
+            <th>Name</th>
+            <th>Version</th>
+            <th>Release Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($products as $product) : ?>
+            <tr>
+                <td><?= htmlspecialchars($product['productCode']) ?></td>
+                <td><?= htmlspecialchars($product['name']) ?></td>
+                <td><?= htmlspecialchars($product['version']) ?></td>
+                <td><?= htmlspecialchars(date("F j, Y", strtotime($product['releaseDate']))) ?></td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
+
+<?php require_once(__DIR__ . '/../view/footer.php'); ?>
