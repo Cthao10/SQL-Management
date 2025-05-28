@@ -1,0 +1,7 @@
+<footer class="bg-light text-center text-muted py-3 mt-5">
+    <div class="container">
+        <small>&copy; <?php echo date("Y"); ?> Tech Support. All rights reserved.</small>
+    </div>
+</footer>
+</body>
+</html>

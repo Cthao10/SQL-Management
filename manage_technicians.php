@@ -1,0 +1,82 @@
+<?php
+session_start();
+require_once(__DIR__ . '/view/header.php');
+
+if (!isset($_SESSION['technicians'])) {
+    $_SESSION['technicians'] = [];
+}
+
+$message = '';
+
+// Handle delete
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
+    $index = $_POST['delete'];
+    if (isset($_SESSION['technicians'][$index])) {
+        unset($_SESSION['technicians'][$index]);
+        $_SESSION['technicians'] = array_values($_SESSION['technicians']); // Reindex
+        $message = "Technician deleted.";
+    }
+}
+
+// Handle add
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add'])) {
+    $technician = [
+        'firstName' => $_POST['firstName'] ?? '',
+        'lastName'  => $_POST['lastName'] ?? '',
+        'email'     => $_POST['email'] ?? '',
+        'phone'     => $_POST['phone'] ?? '',
+        'password'  => $_POST['password'] ?? ''
+    ];
+    $_SESSION['technicians'][] = $technician;
+    $message = 'Technician added.';
+}
+?>
+
+<div class="container mt-5">
+    <h2>Manage Technicians</h2>
+
+    <?php if ($message): ?>
+        <div class="alert alert-info"><?= htmlspecialchars($message) ?></div>
+    <?php endif; ?>
+
+    <form method="post">
+        <div class="row g-3">
+            <div class="col-md-6"><input class="form-control" name="firstName" placeholder="First Name" required></div>
+            <div class="col-md-6"><input class="form-control" name="lastName" placeholder="Last Name" required></div>
+            <div class="col-md-6"><input class="form-control" type="email" name="email" placeholder="Email" required></div>
+            <div class="col-md-6"><input class="form-control" name="phone" placeholder="Phone" required></div>
+            <div class="col-md-12"><input class="form-control" type="password" name="password" placeholder="Password" required></div>
+        </div>
+        <button class="btn btn-primary mt-3" type="submit" name="add">Add Technician</button>
+    </form>
+
+    <?php if (!empty($_SESSION['technicians'])): ?>
+        <hr>
+        <h3>Technicians</h3>
+        <table class="table table-bordered mt-3">
+            <thead>
+                <tr>
+                    <th>First</th><th>Last</th><th>Email</th><th>Phone</th><th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($_SESSION['technicians'] as $i => $t): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($t['firstName']) ?></td>
+                        <td><?= htmlspecialchars($t['lastName']) ?></td>
+                        <td><?= htmlspecialchars($t['email']) ?></td>
+                        <td><?= htmlspecialchars($t['phone']) ?></td>
+                        <td>
+                            <form method="post" style="margin:0;">
+                                <input type="hidden" name="delete" value="<?= $i ?>">
+                                <button class="btn btn-sm btn-danger" type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
+</div>
+
+<?php require_once(__DIR__ . '/view/footer.php'); ?>
