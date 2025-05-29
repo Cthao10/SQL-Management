@@ -1,0 +1,35 @@
+<?php
+require_once(__DIR__ . '/../models/database.php');
+
+// Get products
+$query = 'SELECT * FROM products ORDER BY name';
+$statement = $db->prepare($query);
+$statement->execute();
+$products = $statement->fetchAll();
+$statement->closeCursor();
+?>
+
+<div class="container mt-5">
+    <h2>Product Manager</h2>
+    <table class="table table-bordered mt-3">
+        <thead>
+        <tr>
+            <th>Product Code</th>
+            <th>Name</th>
+            <th>Version</th>
+            <th>Release Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($products as $product) : ?>
+            <tr>
+                <td><?= htmlspecialchars($product['productCode']) ?></td>
+                <td><?= htmlspecialchars($product['name']) ?></td>
+                <td><?= htmlspecialchars($product['version']) ?></td>
+                <td><?= htmlspecialchars(date("F j, Y", strtotime($product['releaseDate']))) ?></td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
+
