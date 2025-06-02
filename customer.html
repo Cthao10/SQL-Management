@@ -3,6 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>Manage Customers</title>
+    <script>
+        function addEntry() {
+            var table = document.getElementById("customer_table");
+            var values = ["customer_id", "first_name", "last_name", "company_name", "country", "city", "postal_code", "phone_number"].map(id => document.getElementById(id).value);
+            var row = table.insertRow();
+            row.innerHTML = `<td>${values.join('</td><td>')}</td><td><button onclick="deleteRow(this)">Delete</button></td>`;
+            ["customer_id", "first_name", "last_name", "company_name", "country", "city", "postal_code", "phone_number"].forEach(id => document.getElementById(id).value = "");
+        }
+        function deleteRow(btn) {
+            var row = btn.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+        }
+    </script>
 </head>
 <body>
     <nav style="margin-bottom: 20px;">
@@ -15,36 +28,21 @@
     <hr>
 
     <h1>Manage Customers</h1>
-    <form>
-        <label>Customer ID: <input type="text" name="customer_id" required></label><br>
-        <label>First Name: <input type="text" name="first_name" required></label><br>
-        <label>Last Name: <input type="text" name="last_name" required></label><br>
-        <label>Company Name: <input type="text" name="company_name" required></label><br>
-        <label>Country: <input type="text" name="country" required></label><br>
-        <label>City: <input type="text" name="city" required></label><br>
-        <label>Postal Code: <input type="text" name="postal_code" required></label><br>
-        <label>Phone Number: <input type="text" name="phone_number" required></label><br>
+    <form onsubmit="event.preventDefault(); addEntry();">
+        <label>Customer ID: <input type="text" id="customer_id" required></label><br>
+        <label>First Name: <input type="text" id="first_name" required></label><br>
+        <label>Last Name: <input type="text" id="last_name" required></label><br>
+        <label>Company Name: <input type="text" id="company_name" required></label><br>
+        <label>Country: <input type="text" id="country" required></label><br>
+        <label>City: <input type="text" id="city" required></label><br>
+        <label>Postal Code: <input type="text" id="postal_code" required></label><br>
+        <label>Phone Number: <input type="text" id="phone_number" required></label><br>
         <button type="submit">Submit</button>
     </form>
 
-    <h2>Search</h2>
-    <form>
-        <input type="text" name="search" placeholder="Search...">
-        <button type="submit">Search</button>
-    </form>
-
-    <h2>Saved Customers</h2>
-    <table border="1">
-        <tr>
-            <th>Customer ID</th><th>First Name</th><th>Last Name</th>
-            <th>Company</th><th>Country</th><th>City</th>
-            <th>Postal Code</th><th>Phone</th>
-        </tr>
-        <tr><td>1</td><td>Alice</td><td>Smith</td><td>Alpha Inc.</td><td>USA</td><td>New York</td><td>10001</td><td>123-456-7890</td></tr>
-        <tr><td>2</td><td>Bob</td><td>Johnson</td><td>Beta LLC</td><td>USA</td><td>Chicago</td><td>60601</td><td>234-567-8901</td></tr>
-        <tr><td>3</td><td>Charlie</td><td>Lee</td><td>Gamma Co.</td><td>USA</td><td>Los Angeles</td><td>90001</td><td>345-678-9012</td></tr>
-        <tr><td>4</td><td>Diana</td><td>Garcia</td><td>Delta Ltd.</td><td>USA</td><td>Houston</td><td>77001</td><td>456-789-0123</td></tr>
-        <tr><td>5</td><td>Evan</td><td>Martinez</td><td>Epsilon Corp.</td><td>USA</td><td>Phoenix</td><td>85001</td><td>567-890-1234</td></tr>
+    <h2>Saved Entries</h2>
+    <table border="1" id="customer_table">
+        <tr><th>Customer ID</th><th>First Name</th><th>Last Name</th><th>Company</th><th>Country</th><th>City</th><th>Postal Code</th><th>Phone Number</th><th>Action</th></tr>
     </table>
 </body>
 </html>
