@@ -3,6 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <title>Manage Orders</title>
+    <script>
+        function addEntry() {
+            var table = document.getElementById("order_table");
+            var fields = ["order_id", "customer_id", "employee_id", "product_id", "quantity", "storage_location", "destination"];
+            var values = fields.map(id => document.getElementById(id).value);
+            var row = table.insertRow();
+            row.innerHTML = `<td>${values.join('</td><td>')}</td><td><button onclick="deleteRow(this)">Delete</button></td>`;
+            fields.forEach(id => document.getElementById(id).value = "");
+        }
+        function deleteRow(btn) {
+            var row = btn.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+        }
+    </script>
 </head>
 <body>
     <nav style="margin-bottom: 20px;">
@@ -13,40 +27,22 @@
         <a href="orders.html">Orders</a>
     </nav>
     <hr>
+
     <h1>Manage Orders</h1>
-    <form>
-        <label>Order ID: <input type="text" name="order_id" required></label><br>
-        <label>Customer ID: <input type="text" name="customer_id" required></label><br>
-        <label>Employee ID: <input type="text" name="employee_id" required></label><br>
-        <label>Product ID: <input type="text" name="product_id" required></label><br>
-        <label>Quantity (kg): <input type="text" name="quantity" required></label><br>
-        <label>Storage Location: <input type="text" name="storage_location" required></label><br>
-        <label>Destination (City): <input type="text" name="destination" required></label><br>
+    <form onsubmit="event.preventDefault(); addEntry();">
+        <label>Order ID: <input type="text" id="order_id" required></label><br>
+        <label>Customer ID: <input type="text" id="customer_id" required></label><br>
+        <label>Employee ID: <input type="text" id="employee_id" required></label><br>
+        <label>Product ID: <input type="text" id="product_id" required></label><br>
+        <label>Quantity (kg): <input type="text" id="quantity" required></label><br>
+        <label>Storage Location: <input type="text" id="storage_location" required></label><br>
+        <label>Destination (City): <input type="text" id="destination" required></label><br>
         <button type="submit">Submit</button>
     </form>
 
-    <h2>Search</h2>
-    <form>
-        <input type="text" name="search" placeholder="Search...">
-        <button type="submit">Search</button>
-    </form>
-
-    <h2>Order History</h2>
-    <table border="1">
-        <tr>
-            <th>Order ID</th>
-            <th>Customer ID</th>
-            <th>Employee ID</th>
-            <th>Product ID</th>
-            <th>Quantity</th>
-            <th>Storage Location</th>
-            <th>Destination</th>
-        </tr>
-        <tr><td>1</td><td>1</td><td>1</td><td>GDL</td><td>150 kg</td><td>5200A06</td><td>New York</td></tr>
-        <tr><td>2</td><td>2</td><td>1</td><td>BC</td><td>40 kg</td><td>5300E10</td><td>Chicago</td></tr>
-        <tr><td>3</td><td>3</td><td>2</td><td>GDL</td><td>200 kg</td><td>5200A06</td><td>Los Angeles</td></tr>
-        <tr><td>4</td><td>4</td><td>2</td><td>BC</td><td>25 kg</td><td>5300E10</td><td>Houston</td></tr>
-        <tr><td>5</td><td>5</td><td>1</td><td>GDL</td><td>300 kg</td><td>5200A06</td><td>Phoenix</td></tr>
+    <h2>Saved Entries</h2>
+    <table border="1" id="order_table">
+        <tr><th>Order ID</th><th>Customer ID</th><th>Employee ID</th><th>Product ID</th><th>Quantity</th><th>Storage Location</th><th>Destination</th><th>Action</th></tr>
     </table>
 </body>
 </html>
