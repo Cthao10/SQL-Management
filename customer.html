@@ -4,17 +4,51 @@
     <meta charset="UTF-8">
     <title>Manage Customers</title>
     <script>
+        function loadData() {
+            const table = document.getElementById("customer_table");
+            const data = JSON.parse(localStorage.getItem("customers") || "[]");
+            data.forEach((entry, index) => {
+                const row = table.insertRow();
+                row.innerHTML = `
+                    <td>${entry.customer_id}</td>
+                    <td>${entry.first_name}</td>
+                    <td>${entry.last_name}</td>
+                    <td>${entry.company_name}</td>
+                    <td>${entry.country}</td>
+                    <td>${entry.city}</td>
+                    <td>${entry.postal_code}</td>
+                    <td>${entry.phone_number}</td>
+                    <td><button onclick="deleteRow(this, ${index})">Delete</button></td>`;
+            });
+        }
+
         function addEntry() {
-            var table = document.getElementById("customer_table");
-            var values = ["customer_id", "first_name", "last_name", "company_name", "country", "city", "postal_code", "phone_number"].map(id => document.getElementById(id).value);
-            var row = table.insertRow();
-            row.innerHTML = `<td>${values.join('</td><td>')}</td><td><button onclick="deleteRow(this)">Delete</button></td>`;
-            ["customer_id", "first_name", "last_name", "company_name", "country", "city", "postal_code", "phone_number"].forEach(id => document.getElementById(id).value = "");
+            const newEntry = {
+                customer_id: document.getElementById("customer_id").value,
+                first_name: document.getElementById("first_name").value,
+                last_name: document.getElementById("last_name").value,
+                company_name: document.getElementById("company_name").value,
+                country: document.getElementById("country").value,
+                city: document.getElementById("city").value,
+                postal_code: document.getElementById("postal_code").value,
+                phone_number: document.getElementById("phone_number").value
+            };
+            const data = JSON.parse(localStorage.getItem("customers") || "[]");
+            data.push(newEntry);
+            localStorage.setItem("customers", JSON.stringify(data));
+            location.reload();
         }
-        function deleteRow(btn) {
-            var row = btn.parentNode.parentNode;
+
+        function deleteRow(btn, index) {
+            const row = btn.parentNode.parentNode;
             row.parentNode.removeChild(row);
+            const data = JSON.parse(localStorage.getItem("customers") || "[]");
+            data.splice(index, 1);
+            localStorage.setItem("customers", JSON.stringify(data));
+            location.reload();
         }
+
+        window.onload = loadData;
     </script>
 </head>
 <body>
@@ -42,7 +76,11 @@
 
     <h2>Saved Entries</h2>
     <table border="1" id="customer_table">
-        <tr><th>Customer ID</th><th>First Name</th><th>Last Name</th><th>Company</th><th>Country</th><th>City</th><th>Postal Code</th><th>Phone Number</th><th>Action</th></tr>
+        <tr>
+            <th>Customer ID</th><th>First Name</th><th>Last Name</th>
+            <th>Company</th><th>Country</th><th>City</th>
+            <th>Postal Code</th><th>Phone</th><th>Action</th>
+        </tr>
     </table>
 </body>
 </html>
