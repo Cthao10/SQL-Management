@@ -3,6 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <title>Manage Product</title>
+    <script>
+        function addEntry() {
+            var table = document.getElementById("product_table");
+            var fields = ["product_id", "product_price", "product_weight", "storage_location", "product_quantity"];
+            var values = fields.map(id => document.getElementById(id).value);
+            var row = table.insertRow();
+            row.innerHTML = `<td>${values.join('</td><td>')}</td><td><button onclick="deleteRow(this)">Delete</button></td>`;
+            fields.forEach(id => document.getElementById(id).value = "");
+        }
+        function deleteRow(btn) {
+            var row = btn.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+        }
+    </script>
 </head>
 <body>
     <nav style="margin-bottom: 20px;">
@@ -15,26 +29,18 @@
     <hr>
 
     <h1>Manage Product</h1>
-    <form>
-        <label>Product ID: <input type="text" name="product_id" required></label><br>
-        <label>Product Price: <input type="text" name="product_price" required></label><br>
-        <label>Product Weight (kg or lb): <input type="text" name="product_weight" required></label><br>
-        <label>Storage Location: <input type="text" name="storage_location" required></label><br>
-        <label>Product Quantity: <input type="text" name="product_quantity" required></label><br>
+    <form onsubmit="event.preventDefault(); addEntry();">
+        <label>Product ID: <input type="text" id="product_id" required></label><br>
+        <label>Product Price: <input type="text" id="product_price" required></label><br>
+        <label>Product Weight (kg or lb): <input type="text" id="product_weight" required></label><br>
+        <label>Storage Location: <input type="text" id="storage_location" required></label><br>
+        <label>Product Quantity: <input type="text" id="product_quantity" required></label><br>
         <button type="submit">Submit</button>
     </form>
 
-    <h2>Search</h2>
-    <form>
-        <input type="text" name="search" placeholder="Search...">
-        <button type="submit">Search</button>
-    </form>
-
-    <h2>Saved Products</h2>
-    <table border="1">
-        <tr><th>Product ID</th><th>Price</th><th>Weight</th><th>Storage Location</th><th>Quantity</th></tr>
-        <tr><td>GDL</td><td>$10.00</td><td>kg</td><td>5200A06</td><td>1000</td></tr>
-        <tr><td>BC</td><td>$15.00</td><td>kg</td><td>5300E10</td><td>500</td></tr>
+    <h2>Saved Entries</h2>
+    <table border="1" id="product_table">
+        <tr><th>Product ID</th><th>Price</th><th>Weight</th><th>Storage Location</th><th>Quantity</th><th>Action</th></tr>
     </table>
 </body>
 </html>
