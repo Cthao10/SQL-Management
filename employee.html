@@ -3,6 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <title>Manage Employee</title>
+    <script>
+        function addEntry() {
+            var table = document.getElementById("employee_table");
+            var row = table.insertRow();
+            var employee_id = document.getElementById("employee_id").value;
+            var first_name = document.getElementById("first_name").value;
+            var last_name = document.getElementById("last_name").value;
+            var phone_number = document.getElementById("phone_number").value;
+            row.innerHTML = `<td>${employee_id}</td><td>${first_name}</td><td>${last_name}</td><td>${phone_number}</td><td><button onclick="deleteRow(this)">Delete</button></td>`;
+            document.getElementById("employee_id").value = "";
+            document.getElementById("first_name").value = "";
+            document.getElementById("last_name").value = "";
+            document.getElementById("phone_number").value = "";
+        }
+
+        function deleteRow(btn) {
+            var row = btn.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+        }
+    </script>
 </head>
 <body>
     <nav style="margin-bottom: 20px;">
@@ -13,26 +33,19 @@
         <a href="orders.html">Orders</a>
     </nav>
     <hr>
+
     <h1>Manage Employee</h1>
-    <form>
-        <label>Employee ID: <input type="text" name="employee_id" required></label><br>
-        <label>First Name: <input type="text" name="first_name" required></label><br>
-        <label>Last Name: <input type="text" name="last_name" required></label><br>
-        <label>Phone Number: <input type="text" name="phone_number" required></label><br>
+    <form onsubmit="event.preventDefault(); addEntry();">
+        <label>Employee ID: <input type="text" id="employee_id" required></label><br>
+        <label>First Name: <input type="text" id="first_name" required></label><br>
+        <label>Last Name: <input type="text" id="last_name" required></label><br>
+        <label>Phone Number: <input type="text" id="phone_number" required></label><br>
         <button type="submit">Submit</button>
     </form>
 
-    <h2>Search</h2>
-    <form>
-        <input type="text" name="search" placeholder="Search...">
-        <button type="submit">Search</button>
-    </form>
-
-    <h2>Saved Employee</h2>
-    <table border="1">
-        <tr><th>Employee ID</th><th>First Name</th><th>Last Name</th><th>Phone Number</th></tr>
-        <tr><td>1</td><td>Susan</td><td>Walker</td><td>678-901-2345</td></tr>
-        <tr><td>2</td><td>James</td><td>Adams</td><td>789-012-3456</td></tr>
+    <h2>Saved Entries</h2>
+    <table border="1" id="employee_table">
+        <tr><th>Employee ID</th><th>First Name</th><th>Last Name</th><th>Phone Number</th><th>Action</th></tr>
     </table>
 </body>
 </html>
