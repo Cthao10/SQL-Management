@@ -4,24 +4,40 @@
     <meta charset="UTF-8">
     <title>Manage Employee</title>
     <script>
-        function addEntry() {
-            var table = document.getElementById("employee_table");
-            var row = table.insertRow();
-            var employee_id = document.getElementById("employee_id").value;
-            var first_name = document.getElementById("first_name").value;
-            var last_name = document.getElementById("last_name").value;
-            var phone_number = document.getElementById("phone_number").value;
-            row.innerHTML = `<td>${employee_id}</td><td>${first_name}</td><td>${last_name}</td><td>${phone_number}</td><td><button onclick="deleteRow(this)">Delete</button></td>`;
-            document.getElementById("employee_id").value = "";
-            document.getElementById("first_name").value = "";
-            document.getElementById("last_name").value = "";
-            document.getElementById("phone_number").value = "";
+        function loadEmployees() {
+            const table = document.getElementById("employee_table");
+            const employees = JSON.parse(localStorage.getItem("employees") || "[]");
+            employees.forEach((emp, index) => {
+                const row = table.insertRow();
+                row.innerHTML = `<td>${emp.employee_id}</td><td>${emp.first_name}</td><td>${emp.last_name}</td><td>${emp.phone_number}</td>
+                    <td><button onclick="deleteRow(this, ${index})">Delete</button></td>`;
+            });
         }
 
-        function deleteRow(btn) {
-            var row = btn.parentNode.parentNode;
-            row.parentNode.removeChild(row);
+        function addEntry() {
+            const employee_id = document.getElementById("employee_id").value;
+            const first_name = document.getElementById("first_name").value;
+            const last_name = document.getElementById("last_name").value;
+            const phone_number = document.getElementById("phone_number").value;
+
+            const newEmp = { employee_id, first_name, last_name, phone_number };
+            const employees = JSON.parse(localStorage.getItem("employees") || "[]");
+            employees.push(newEmp);
+            localStorage.setItem("employees", JSON.stringify(employees));
+            location.reload(); // Reload to show the new entry
         }
+
+        function deleteRow(button, index) {
+            const row = button.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+
+            const employees = JSON.parse(localStorage.getItem("employees") || "[]");
+            employees.splice(index, 1);
+            localStorage.setItem("employees", JSON.stringify(employees));
+            location.reload();
+        }
+
+        window.onload = loadEmployees;
     </script>
 </head>
 <body>
