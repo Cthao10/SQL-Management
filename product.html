@@ -4,18 +4,39 @@
     <meta charset="UTF-8">
     <title>Manage Product</title>
     <script>
+        function loadData() {
+            const table = document.getElementById("product_table");
+            const data = JSON.parse(localStorage.getItem("products") || "[]");
+            data.forEach((entry, index) => {
+                const row = table.insertRow();
+                row.innerHTML = `<td>${entry.product_id}</td><td>${entry.product_price}</td><td>${entry.product_weight}</td><td>${entry.storage_location}</td><td>${entry.product_quantity}</td><td><button onclick="deleteRow(this, ${index})">Delete</button></td>`;
+            });
+        }
+
         function addEntry() {
-            var table = document.getElementById("product_table");
-            var fields = ["product_id", "product_price", "product_weight", "storage_location", "product_quantity"];
-            var values = fields.map(id => document.getElementById(id).value);
-            var row = table.insertRow();
-            row.innerHTML = `<td>${values.join('</td><td>')}</td><td><button onclick="deleteRow(this)">Delete</button></td>`;
-            fields.forEach(id => document.getElementById(id).value = "");
+            const newEntry = {
+                product_id: document.getElementById("product_id").value,
+                product_price: document.getElementById("product_price").value,
+                product_weight: document.getElementById("product_weight").value,
+                storage_location: document.getElementById("storage_location").value,
+                product_quantity: document.getElementById("product_quantity").value
+            };
+            const data = JSON.parse(localStorage.getItem("products") || "[]");
+            data.push(newEntry);
+            localStorage.setItem("products", JSON.stringify(data));
+            location.reload();
         }
-        function deleteRow(btn) {
-            var row = btn.parentNode.parentNode;
+
+        function deleteRow(btn, index) {
+            const row = btn.parentNode.parentNode;
             row.parentNode.removeChild(row);
+            const data = JSON.parse(localStorage.getItem("products") || "[]");
+            data.splice(index, 1);
+            localStorage.setItem("products", JSON.stringify(data));
+            location.reload();
         }
+
+        window.onload = loadData;
     </script>
 </head>
 <body>
