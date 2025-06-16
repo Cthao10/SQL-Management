@@ -2,105 +2,128 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Employee</title>
+  <title>Employees</title>
   <style>
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #999; padding: 6px; text-align: left; }
-    button { margin: 2px; }
-    nav a { margin-right: 10px; }
+    form > div { margin-bottom: 8px; }
+    table, th, td { border: 1px solid #ddd; border-collapse: collapse; padding: 5px; }
+    th { background-color: #f0f0f0; }
+    .entry { margin-top: 10px; }
+    button { cursor: pointer; }
   </style>
-  <script>
-    function loadEmployees() {
-      const table = document.getElementById("employee_table");
-      const data = JSON.parse(localStorage.getItem("employees") || "[]");
-      table.innerHTML = `<tr>
-        <th>Employee ID</th><th>First Name</th><th>Last Name</th><th>Phone</th><th>Actions</th>
-      </tr>`;
-      data.forEach((emp, index) => {
-        const row = table.insertRow();
-        row.innerHTML = `
-          <td>${emp.employee_id}</td>
-          <td>${emp.first_name}</td>
-          <td>${emp.last_name}</td>
-          <td>${emp.phone_number}</td>
-          <td><button onclick="deleteEmployee(${index})">Delete</button></td>`;
-      });
-    }
-
-    function addEmployee() {
-      const newEmp = {
-        employee_id: document.getElementById("employee_id").value.trim(),
-        first_name: document.getElementById("first_name").value.trim(),
-        last_name: document.getElementById("last_name").value.trim(),
-        phone_number: document.getElementById("phone_number").value.trim()
-      };
-
-      if (!newEmp.employee_id || !newEmp.first_name || !newEmp.last_name) {
-        alert("Please fill in required fields.");
-        return;
-      }
-
-      const employees = JSON.parse(localStorage.getItem("employees") || "[]");
-      employees.push(newEmp);
-      localStorage.setItem("employees", JSON.stringify(employees));
-
-      document.getElementById("employee_form").reset();
-      loadEmployees();
-    }
-
-    function deleteEmployee(index) {
-      const employees = JSON.parse(localStorage.getItem("employees") || "[]");
-      employees.splice(index, 1);
-      localStorage.setItem("employees", JSON.stringify(employees));
-      loadEmployees();
-    }
-
-    function searchEmployee() {
-      const query = document.getElementById("search_input").value.toLowerCase();
-      const table = document.getElementById("employee_table");
-      const rows = table.getElementsByTagName("tr");
-
-      for (let i = 1; i < rows.length; i++) {
-        const cells = rows[i].getElementsByTagName("td");
-        let found = false;
-        for (let j = 0; j < cells.length - 1; j++) {
-          if (cells[j].textContent.toLowerCase().includes(query)) {
-            found = true;
-            break;
-          }
-        }
-        rows[i].style.display = found ? "" : "none";
-      }
-    }
-
-    window.onload = loadEmployees;
-  </script>
 </head>
 <body>
-  <nav>
-    <a href="dashboard.html">Dashboard</a>
-    <a href="customers.html">Customers</a>
-    <a href="employee.html">Employee</a>
-    <a href="product.html">Product</a>
-    <a href="orders.html">Orders</a>
-  </nav>
 
-  <h1>Employee</h1>
+<nav>
+  <ul style="list-style:none; display:flex; gap:10px;">
+    <li><a href="customers.html">Customers</a></li>
+    <li><a href="product.html">Products</a></li>
+    <li><a href="employee.html">Employees</a></li>
+    <li><a href="orders.html">Orders</a></li>
+  </ul>
+</nav>
+<hr>
 
-  <form id="employee_form" onsubmit="event.preventDefault(); addEmployee();">
-    <label>Employee ID: <input type="text" id="employee_id" required></label><br>
-    <label>First Name: <input type="text" id="first_name" required></label><br>
-    <label>Last Name: <input type="text" id="last_name" required></label><br>
-    <label>Phone Number: <input type="text" id="phone_number"></label><br>
-    <button type="submit">Submit</button>
-  </form>
+<h1>Employees</h1>
 
-  <div style="margin-top: 10px;">
-    <input type="text" id="search_input" placeholder="Search Employees..." />
-    <button type="button" onclick="searchEmployee()">Search</button>
-  </div>
+<form id="employeeForm">
+  <div><label>First Name: <input type="text" id="firstName" required></label></div>
+  <div><label>Last Name: <input type="text" id="lastName" required></label></div>
+  <div><label>Employee ID: <input type="text" id="employeeId" required></label></div>
+  <div><label>Department: <input type="text" id="department"></label></div>
+  <div><label>Email: <input type="email" id="email"></label></div>
+  <div><label>Phone: <input type="text" id="phone"></label></div>
+  <button type="submit">Add Employee</button>
+</form>
 
-  <h2>Saved Employees</h2>
-  <table id="employee_table"></table>
+<div style="margin-top: 10px;">
+  <input type="text" id="searchInput" placeholder="Search employees..." style="width: 300px; padding:5px;">
+</div>
+
+<div id="entries" class="entry"></div>
+
+<script>
+  const inputs = ['firstName','lastName','employeeId','department','email','phone'];
+  inputs.forEach(id => {
+    const el = document.getElementById(id);
+    el.value = localStorage.getItem('employee_' + id) || '';
+    el.addEventListener('input', () => {
+      localStorage.setItem('employee_' + id, el.value);
+    });
+  });
+
+  const form = document.getElementById('employeeForm');
+  const entriesDiv = document.getElementById('entries');
+  let employees = JSON.parse(localStorage.getItem('employees')) || [];
+
+  function saveEmployees() {
+    localStorage.setItem('employees', JSON.stringify(employees));
+  }
+
+  function clearInputs() {
+    inputs.forEach(id => {
+      document.getElementById(id).value = '';
+      localStorage.removeItem('employee_' + id);
+    });
+  }
+
+  function renderList(filter='') {
+    const filtered = employees.filter(e => {
+      const combined = Object.values(e).join(' ').toLowerCase();
+      return combined.includes(filter.toLowerCase());
+    });
+    if (filtered.length === 0) {
+      entriesDiv.innerHTML = '<p>No employees found.</p>';
+      return;
+    }
+    let html = '<table><thead><tr>';
+    inputs.forEach(id => {
+      html += `<th>${id.charAt(0).toUpperCase() + id.slice(1)}</th>`;
+    });
+    html += '<th>Actions</th></tr></thead><tbody>';
+    filtered.forEach((e, i) => {
+      html += '<tr>';
+      inputs.forEach(id => {
+        html += `<td>${e[id] || ''}</td>`;
+      });
+      html += `<td><button data-index="${i}" class="deleteBtn">Delete</button></td></tr>`;
+    });
+    html += '</tbody></table>';
+    entriesDiv.innerHTML = html;
+
+    document.querySelectorAll('.deleteBtn').forEach(btn => {
+      btn.onclick = () => {
+        employees.splice(btn.dataset.index, 1);
+        saveEmployees();
+        renderList(document.getElementById('searchInput').value);
+      };
+    });
+  }
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const newEmployee = {};
+    let valid = true;
+    inputs.forEach(id => {
+      const val = document.getElementById(id).value.trim();
+      if ((id === 'firstName' || id === 'lastName' || id === 'employeeId') && val === '') valid = false;
+      newEmployee[id] = val;
+    });
+    if (!valid) {
+      alert('First Name, Last Name, and Employee ID are required.');
+      return;
+    }
+    employees.push(newEmployee);
+    saveEmployees();
+    renderList();
+    clearInputs();
+  });
+
+  document.getElementById('searchInput').addEventListener('input', e => {
+    renderList(e.target.value);
+  });
+
+  renderList();
+</script>
+
 </body>
 </html>
