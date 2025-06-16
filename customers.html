@@ -4,56 +4,43 @@
   <meta charset="UTF-8">
   <title>Customers</title>
   <style>
-    body { font-family: sans-serif; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #999; padding: 8px; }
     nav a { margin-right: 10px; }
   </style>
   <script>
     function loadCustomers() {
       const table = document.getElementById("customer_table");
       const data = JSON.parse(localStorage.getItem("customers") || "[]");
-      table.innerHTML = `
-        <tr><th>ID</th><th>First</th><th>Last</th><th>Company</th><th>Country</th>
-        <th>City</th><th>Postal</th><th>Phone</th><th>Action</th></tr>`;
+      table.innerHTML = `<tr><th>ID</th><th>First</th><th>Last</th><th>Company</th><th>Country</th><th>City</th><th>Postal</th><th>Phone</th><th>Action</th></tr>`;
       data.forEach((c, i) => {
-        table.innerHTML += `
-          <tr><td>${c.id}</td><td>${c.first}</td><td>${c.last}</td><td>${c.company}</td>
-          <td>${c.country}</td><td>${c.city}</td><td>${c.postal}</td><td>${c.phone}</td>
-          <td><button onclick="delCustomer(${i})">Delete</button></td></tr>`;
+        table.innerHTML += `<tr><td>${c.id}</td><td>${c.first}</td><td>${c.last}</td><td>${c.company}</td><td>${c.country}</td><td>${c.city}</td><td>${c.postal}</td><td>${c.phone}</td>
+        <td><button onclick="delCustomer(${i})">Delete</button></td></tr>`;
       });
     }
 
     function addCustomer() {
-      const newCust = {
-        id: document.getElementById("id").value,
-        first: document.getElementById("first").value,
-        last: document.getElementById("last").value,
-        company: document.getElementById("company").value,
-        country: document.getElementById("country").value,
-        city: document.getElementById("city").value,
-        postal: document.getElementById("postal").value,
-        phone: document.getElementById("phone").value
+      const c = {
+        id: id.value, first: first.value, last: last.value, company: company.value,
+        country: country.value, city: city.value, postal: postal.value, phone: phone.value
       };
-      const data = JSON.parse(localStorage.getItem("customers") || "[]");
-      data.push(newCust);
-      localStorage.setItem("customers", JSON.stringify(data));
+      const all = JSON.parse(localStorage.getItem("customers") || "[]");
+      all.push(c);
+      localStorage.setItem("customers", JSON.stringify(all));
       loadCustomers();
     }
 
-    function delCustomer(index) {
-      const data = JSON.parse(localStorage.getItem("customers") || "[]");
-      data.splice(index, 1);
-      localStorage.setItem("customers", JSON.stringify(data));
+    function delCustomer(i) {
+      const all = JSON.parse(localStorage.getItem("customers") || "[]");
+      all.splice(i, 1);
+      localStorage.setItem("customers", JSON.stringify(all));
       loadCustomers();
     }
 
-    function searchCustomer() {
-      const q = document.getElementById("search").value.toLowerCase();
-      const rows = document.querySelectorAll("#customer_table tr:not(:first-child)");
-      rows.forEach(row => {
-        row.style.display = [...row.cells].some(td =>
-          td.textContent.toLowerCase().includes(q)) ? "" : "none";
+    function search() {
+      const q = search_input.value.toLowerCase();
+      document.querySelectorAll("#customer_table tr:not(:first-child)").forEach(row => {
+        row.style.display = [...row.cells].some(td => td.textContent.toLowerCase().includes(q)) ? "" : "none";
       });
     }
 
@@ -72,17 +59,16 @@
   <h1>Customers</h1>
   <form onsubmit="event.preventDefault(); addCustomer();">
     <label>ID: <input type="text" id="id" required></label><br>
-    <label>First Name: <input type="text" id="first" required></label><br>
-    <label>Last Name: <input type="text" id="last" required></label><br>
+    <label>First: <input type="text" id="first" required></label><br>
+    <label>Last: <input type="text" id="last" required></label><br>
     <label>Company: <input type="text" id="company" required></label><br>
     <label>Country: <input type="text" id="country" required></label><br>
     <label>City: <input type="text" id="city" required></label><br>
-    <label>Postal Code: <input type="text" id="postal" required></label><br>
+    <label>Postal: <input type="text" id="postal" required></label><br>
     <label>Phone: <input type="text" id="phone" required></label><br>
     <button type="submit">Submit</button><br><br>
-    <label>Search All Records: <input type="text" id="search" oninput="searchCustomer()" placeholder="Search by any field..."></label>
+    <label>Search: <input type="text" id="search_input" oninput="search()" placeholder="Search..."></label>
   </form>
-
   <table id="customer_table"></table>
 </body>
 </html>
