@@ -9,13 +9,13 @@
   nav { background: #333; padding: 10px; }
   nav a { color: white; margin-right: 15px; text-decoration: none; }
   nav a:hover { text-decoration: underline; }
-  form { margin-bottom: 20px; }
+  form { margin-bottom: 20px; max-width: 400px; }
   label { display: block; margin-top: 10px; }
-  input, select { padding: 5px; width: 100%; max-width: 300px; }
+  input, select { padding: 5px; width: 100%; }
   button { margin-top: 15px; padding: 8px 12px; }
-  #searchBar { margin-top: 10px; padding: 6px; width: 300px; }
+  #searchBar { margin-top: 10px; padding: 6px; width: 100%; max-width: 400px; }
   .order-entry { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
-  .order-buttons button { margin-right: 10px; }
+  .order-buttons button { margin-right: 10px; margin-top: 5px; }
   .order-header { font-weight: bold; margin-bottom: 5px; }
   .inline { display: inline-block; margin-right: 10px; }
 </style>
@@ -31,11 +31,14 @@
 
 <h1>Orders</h1>
 
-<form id="orderForm">
-  <label for="orderDate">Order Date</label>
+<form id="orderForm" onsubmit="event.preventDefault(); addOrder();">
+  <label for="orderId">Order ID:</label>
+  <input type="text" id="orderId" required />
+
+  <label for="orderDate">Order Date:</label>
   <input type="date" id="orderDate" required />
 
-  <label for="itemStatus">Item Status</label>
+  <label for="itemStatus">Item Status:</label>
   <select id="itemStatus" required>
     <option value="">-- Select Status --</option>
     <option value="pending">Pending</option>
@@ -44,43 +47,48 @@
     <option value="cancelled">Cancelled</option>
   </select>
 
-<form id="orderForm" onsubmit="event.preventDefault(); addOrder();">
-  <label for="orderId">Order ID:</label>
-  <input type="text" id="orderId" required><br>
-
-  <label for="orderDate">Order Date:</label>
-  <input type="date" id="orderDate" required><br>
-
   <label for="itemId">Item ID:</label>
-  <input type="text" id="itemId" required><br>
+  <input type="text" id="itemId" required />
 
   <label for="productName">Product Name:</label>
-  <input type="text" id="productName" required><br>
+  <input type="text" id="productName" required />
 
   <label for="quantity">Quantity (kg):</label>
-  <input type="number" id="quantity" required><br>
+  <input type="number" id="quantity" min="1" required />
 
   <label for="customerName">Customer Name:</label>
-  <input type="text" id="customerName" required><br>
+  <input type="text" id="customerName" required />
 
   <label for="storageLocation">Storage Location:</label>
-  <input type="text" id="storageLocation" required><br>
+  <input type="text" id="storageLocation" required />
 
   <label for="destination">Destination:</label>
-  <input type="text" id="destination" required><br>
+  <input type="text" id="destination" required />
 
-  <button type="submit">Add Order</button><br>
+  <label for="paymentMethod">Payment Method:</label>
+  <input type="text" id="paymentMethod" required />
 
-  <label for="searchBar">Search All Fields:</label><br>
-  <input type="text" id="searchBar" placeholder="Search orders..." oninput="searchOrders()">
+  <label for="price">Price ($):</label>
+  <input type="number" id="price" min="0" step="0.01" required />
+
+  <label for="tax">Tax ($):</label>
+  <input type="number" id="tax" min="0" step="0.01" required />
+
+  <label for="shippingRate">Shipping Rate ($):</label>
+  <input type="number" id="shippingRate" min="0" step="0.01" required />
+
+  <button type="submit">Add Order</button>
+
+  <label for="searchBar">Search All Fields:</label>
+  <input type="text" id="searchBar" placeholder="Search orders..." />
 </form>
 
 <div id="orderList"></div>
 
 <script>
-// Save form inputs in localStorage and restore on load
 const form = document.getElementById('orderForm');
-const inputs = Array.from(form.elements).filter(el => el.tagName === 'INPUT' || el.tagName === 'SELECT');
+const inputs = Array.from(form.elements).filter(el => ['INPUT', 'SELECT'].includes(el.tagName));
+
 inputs.forEach(input => {
   const saved = localStorage.getItem('order_' + input.id);
   if (saved) input.value = saved;
@@ -89,27 +97,51 @@ inputs.forEach(input => {
 
 let orders = JSON.parse(localStorage.getItem('orders')) || [];
 
+function addOrder() {
+  const newOrder = {
+    orderId: form.orderId.value.trim(),
+    orderDate: form.orderDate.value,
+    itemStatus: form.itemStatus.value,
+    itemId: form.itemId.value.trim(),
+    productName: form.productName.value.trim(),
+    quantity: Number(form.quantity.value),
+    customerName: form.customerName.value.trim(),
+    storageLocation: form.storageLocation.value.trim(),
+    destination: form.destination.value.trim(),
+    paymentMethod: form.paymentMethod.value.trim(),
+    price: parseFloat(form.price.value).toFixed(2),
+    tax: parseFloat(form.tax.value).toFixed(2),
+    shippingRate: parseFloat(form.shippingRate.value).toFixed(2)
+  };
+
+  orders.push(newOrder);
+  saveOrders();
+  renderOrders(document.getElementById('searchBar').value);
+  clearForm();
+}
+
 function renderOrders(filter = '') {
   const container = document.getElementById('orderList');
   container.innerHTML = '';
 
-  // Filter orders by search string (case-insensitive)
-  const filtered = orders.filter(order => {
-    return Object.values(order).some(val =>
+  const filtered = orders.filter(order =>
+    Object.values(order).some(val =>
       String(val).toLowerCase().includes(filter.toLowerCase())
-    );
-  });
+    )
+  );
 
   filtered.forEach((order, index) => {
     const div = document.createElement('div');
     div.className = 'order-entry';
 
     div.innerHTML = `
-      <div class="order-header">Order #${index + 1} - ${order.orderDate} - ${order.itemStatus}</div>
-      <div><span class="inline"><strong>Customer:</strong> ${order.customerName}</span>
-      <span class="inline"><strong>Item ID:</strong> ${order.itemId}</span>
-      <span class="inline"><strong>Quantity:</strong> ${order.quantity}</span></div>
-      <div><strong>Invoice:</strong> Payment: ${order.paymentMethod}, Price: $${parseFloat(order.price).toFixed(2)}, Tax: $${parseFloat(order.tax).toFixed(2)}, Shipping: $${parseFloat(order.shippingRate).toFixed(2)}</div>
+      <div class="order-header">Order #${order.orderId} - ${order.orderDate} - ${order.itemStatus}</div>
+      <div>
+        <span class="inline"><strong>Customer:</strong> ${order.customerName}</span>
+        <span class="inline"><strong>Item ID:</strong> ${order.itemId}</span>
+        <span class="inline"><strong>Quantity:</strong> ${order.quantity}</span>
+      </div>
+      <div><strong>Invoice:</strong> Payment: ${order.paymentMethod}, Price: $${order.price}, Tax: $${order.tax}, Shipping: $${order.shippingRate}</div>
       <div class="order-buttons">
         <button onclick="viewDetails(${index})">View Detail</button>
         <button onclick="reOrder(${index})">Re-order</button>
@@ -147,23 +179,39 @@ function viewDetails(index) {
     return;
   }
 
-  // Example details: receipt, shipping method, history
   const order = orders[index];
   detailDiv.style.display = 'block';
   detailDiv.innerHTML = `
-    <div><strong>Receipt:</strong> Order on ${order.orderDate} for ${order.quantity} item(s) at $${parseFloat(order.price).toFixed(2)} each.</div>
+    <div><strong>Receipt:</strong> Order on ${order.orderDate} for ${order.quantity} item(s) of ${order.productName} at $${order.price} each.</div>
     <div><strong>Shipping Method:</strong> Standard Ground</div>
     <div><strong>History:</strong> Status changed to ${order.itemStatus}.</div>
+    <div><strong>Storage Location:</strong> ${order.storageLocation}</div>
+    <div><strong>Destination:</strong> ${order.destination}</div>
   `;
 }
 
 function reOrder(index) {
   const original = orders[index];
-  const newOrder = { ...original, orderDate: new Date().toISOString().split('T')[0], itemStatus: 'pending' };
+  const newOrder = {
+    ...original,
+    orderDate: new Date().toISOString().split('T')[0],
+    itemStatus: 'pending',
+    orderId: generateNewOrderId()
+  };
   orders.push(newOrder);
   saveOrders();
   renderOrders(document.getElementById('searchBar').value);
   alert('Re-order placed with today\'s date and status set to pending.');
+}
+
+function generateNewOrderId() {
+  // Generate a simple new ID, e.g. max + 1 or timestamp
+  let maxId = 0;
+  orders.forEach(o => {
+    let num = parseInt(o.orderId);
+    if (!isNaN(num) && num > maxId) maxId = num;
+  });
+  return String(maxId + 1);
 }
 
 function modifyQuantity(index) {
@@ -176,25 +224,6 @@ function modifyQuantity(index) {
     alert('Invalid quantity.');
   }
 }
-
-form.addEventListener('submit', e => {
-  e.preventDefault();
-  const newOrder = {
-    orderDate: form.orderDate.value,
-    itemStatus: form.itemStatus.value,
-    paymentMethod: form.paymentMethod.value.trim(),
-    price: parseFloat(form.price.value).toFixed(2),
-    tax: parseFloat(form.tax.value).toFixed(2),
-    shippingRate: parseFloat(form.shippingRate.value).toFixed(2),
-    quantity: Number(form.quantity.value),
-    itemId: form.itemId.value.trim(),
-    customerName: form.customerName.value.trim(),
-  };
-  orders.push(newOrder);
-  saveOrders();
-  renderOrders(document.getElementById('searchBar').value);
-  clearForm();
-});
 
 document.getElementById('searchBar').addEventListener('input', e => {
   renderOrders(e.target.value);
