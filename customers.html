@@ -34,30 +34,37 @@
   <div><label>Phone: <input type="text" id="phone"></label></div>
   <div><label>Email: <input type="email" id="email"></label></div>
   <div><label>Product: <input type="text" id="product"></label></div>
-  <div><label>Product Quantity(kg): <input type="number" id="productQuantity"></label></div>
+  <div><label>Product Quantity (kg): <input type="number" id="productQuantity"></label></div>
   <button type="submit">Add Customer</button>
 </form>
 
 <div style="margin-top: 10px;">
-  <input type="text" id="searchInput" placeholder="Search customers..." style="width: 300px; padding:5px;">
+  <input type="text" id="searchInput" placeholder="Search customers..." style="width: 300px; padding:5px;" onkeydown="return event.key !== 'Enter';">
 </div>
 
 <div id="entries" class="entry"></div>
 
 <script>
-  // Helper: Save inputs to localStorage on change
-  const inputs = ['firstName','lastName','address','city','state','postalCode','countryCode','phone','email','password'];
+  const inputs = [
+    'firstName', 'lastName', 'address', 'city', 'state',
+    'phone', 'email', 'product', 'productQuantity'
+  ];
+
+  // Preload saved inputs
   inputs.forEach(id => {
     const el = document.getElementById(id);
-    el.value = localStorage.getItem('customer_' + id) || '';
-    el.addEventListener('input', () => {
-      localStorage.setItem('customer_' + id, el.value);
-    });
+    if (el) {
+      el.value = localStorage.getItem('customer_' + id) || '';
+      el.addEventListener('input', () => {
+        localStorage.setItem('customer_' + id, el.value);
+      });
+    }
   });
 
   const form = document.getElementById('customerForm');
   const entriesDiv = document.getElementById('entries');
-  let customers = JSON.parse(localStorage.getItem('customers')) || [];
+  const searchInput = document.getElementById('searchInput');
+  let customers = JSON.parse(localStorage.getItem('customers') || '[]');
 
   function saveCustomers() {
     localStorage.setItem('customers', JSON.stringify(customers));
@@ -65,41 +72,47 @@
 
   function clearInputs() {
     inputs.forEach(id => {
-      document.getElementById(id).value = '';
-      localStorage.removeItem('customer_' + id);
+      const el = document.getElementById(id);
+      if (el) {
+        el.value = '';
+        localStorage.removeItem('customer_' + id);
+      }
     });
   }
 
-  function renderList(filter='') {
+  function renderList(filter = '') {
     const filtered = customers.filter(c => {
-      const combined = Object.values(c).join(' ').toLowerCase();
-      return combined.includes(filter.toLowerCase());
+      const values = Object.values(c).join(' ').toLowerCase();
+      return values.includes(filter.toLowerCase());
     });
+
     if (filtered.length === 0) {
       entriesDiv.innerHTML = '<p>No customers found.</p>';
       return;
     }
+
     let html = '<table><thead><tr>';
     inputs.forEach(id => {
-      html += `<th>${id.charAt(0).toUpperCase() + id.slice(1)}</th>`;
+      html += `<th>${id.replace(/([A-Z])/g, ' $1')}</th>`;
     });
     html += '<th>Actions</th></tr></thead><tbody>';
-    filtered.forEach((c, i) => {
+
+    filtered.forEach((cust, i) => {
       html += '<tr>';
       inputs.forEach(id => {
-        html += `<td>${c[id] || ''}</td>`;
+        html += `<td>${cust[id] || ''}</td>`;
       });
-      html += `<td><button data-index="${i}" class="deleteBtn">Delete</button></td></tr>`;
+      html += `<td><button class="deleteBtn" data-index="${i}">Delete</button></td></tr>`;
     });
+
     html += '</tbody></table>';
     entriesDiv.innerHTML = html;
 
-    // Attach delete handlers
     document.querySelectorAll('.deleteBtn').forEach(btn => {
       btn.onclick = () => {
         customers.splice(btn.dataset.index, 1);
         saveCustomers();
-        renderList(document.getElementById('searchInput').value);
+        renderList(searchInput.value);
       };
     });
   }
@@ -108,26 +121,28 @@
     e.preventDefault();
     const newCustomer = {};
     let valid = true;
+
     inputs.forEach(id => {
       const val = document.getElementById(id).value.trim();
       if ((id === 'firstName' || id === 'lastName') && val === '') valid = false;
       newCustomer[id] = val;
     });
+
     if (!valid) {
       alert('First and Last Name are required.');
       return;
     }
+
     customers.push(newCustomer);
     saveCustomers();
     renderList();
     clearInputs();
   });
 
-  document.getElementById('searchInput').addEventListener('input', e => {
+  searchInput.addEventListener('input', e => {
     renderList(e.target.value);
   });
 
-  // Initial render
   renderList();
 </script>
 
