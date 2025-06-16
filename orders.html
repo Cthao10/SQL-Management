@@ -1,86 +1,207 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Orders</title>
-  <style>
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #999; padding: 6px; text-align: left; }
-    button { margin: 2px; }
-    nav a { margin-right: 10px; }
-  </style>
-  <script>
-    function loadOrders() {
-      const table = document.getElementById("order_table");
-      const data = JSON.parse(localStorage.getItem("orders") || "[]");
-      table.innerHTML = `<tr>
-        <th>Order ID</th>
-        <th>Customer ID</th>
-        <th>Employee ID</th>
-        <th>Product ID</th>
-        <th>Quantity (kg)</th>
-        <th>Order Date</th>
-        <th>Item Status</th>
-        <th>Storage Location</th>
-        <th>Shipping Location</th>
-        <th>Actions</th>
-      </tr>`;
-      data.forEach((ord, index) => {
-        const row = table.insertRow();
-        row.innerHTML = `
-          <td>${ord.order_id}</td>
-          <td>${ord.customer_id}</td>
-          <td>${ord.employee_id}</td>
-          <td>${ord.product_id}</td>
-          <td>${ord.quantity} kg</td>
-          <td>${ord.order_date}</td>
-          <td>${ord.item_status}</td>
-          <td>${ord.storage_location}</td>
-          <td>${ord.shipping_location}</td>
-          <td>
-            <button onclick="viewDetails(${index})">View Detail</button>
-            <button onclick="reorder(${index})">Re-order</button>
-            <button onclick="modifyQuantity(${index})">Modify Qty</button>
-            <button onclick="deleteOrder(${index})">Delete</button>
-          </td>`;
-      });
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Orders</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; }
+  nav { background: #333; padding: 10px; }
+  nav a { color: white; margin-right: 15px; text-decoration: none; }
+  nav a:hover { text-decoration: underline; }
+  form { margin-bottom: 20px; }
+  label { display: block; margin-top: 10px; }
+  input, select { padding: 5px; width: 100%; max-width: 300px; }
+  button { margin-top: 15px; padding: 8px 12px; }
+  #searchBar { margin-top: 10px; padding: 6px; width: 300px; }
+  .order-entry { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+  .order-buttons button { margin-right: 10px; }
+  .order-header { font-weight: bold; margin-bottom: 5px; }
+  .inline { display: inline-block; margin-right: 10px; }
+</style>
+</head>
+<body>
 
-    function addOrder() {
-      const newOrd = {
-        order_id: document.getElementById("order_id").value.trim(),
-        customer_id: document.getElementById("customer_id").value.trim(),
-        employee_id: document.getElementById("employee_id").value.trim(),
-        product_id: document.getElementById("product_id").value.trim(),
-        quantity: document.getElementById("quantity").value.trim(),
-        order_date: document.getElementById("order_date").value,
-        item_status: document.getElementById("item_status").value,
-        storage_location: document.getElementById("storage_location").value.trim(),
-        shipping_location: document.getElementById("shipping_location").value.trim(),
-        payment_method: document.getElementById("payment_method").value.trim(),
-        price: document.getElementById("price").value.trim(),
-        ship_rate: document.getElementById("ship_rate").value.trim()
-      };
+<nav>
+  <a href="product.html">Products</a>
+  <a href="employee.html">Employees</a>
+  <a href="customers.html">Customers</a>
+  <a href="orders.html">Orders</a>
+</nav>
 
-      if (!newOrd.order_id || !newOrd.customer_id || !newOrd.product_id || !newOrd.quantity) {
-        alert("Please fill in required fields.");
-        return;
-      }
+<h1>Orders</h1>
 
-      const orders = JSON.parse(localStorage.getItem("orders") || "[]");
-      orders.push(newOrd);
-      localStorage.setItem("orders", JSON.stringify(orders));
+<form id="orderForm">
+  <label for="orderDate">Order Date</label>
+  <input type="date" id="orderDate" required />
 
-      document.getElementById("order_form").reset();
-      loadOrders();
-    }
+  <label for="itemStatus">Item Status</label>
+  <select id="itemStatus" required>
+    <option value="">-- Select Status --</option>
+    <option value="pending">Pending</option>
+    <option value="shipped">Shipped</option>
+    <option value="delivered">Delivered</option>
+    <option value="cancelled">Cancelled</option>
+  </select>
 
-    function deleteOrder(index) {
-      const orders = JSON.parse(localStorage.getItem("orders") || "[]");
-      orders.splice(index, 1);
-      localStorage.setItem("orders", JSON.stringify(orders));
-      loadOrders();
-    }
+  <label for="paymentMethod">Payment Method</label>
+  <input type="text" id="paymentMethod" placeholder="e.g. Credit Card" required />
 
-    function viewDetails(index) {
-      const orders = JSON.parse(local
+  <label for="price">Price</label>
+  <input type="number" id="price" min="0" step="0.01" required />
+
+  <label for="tax">Tax</label>
+  <input type="number" id="tax" min="0" step="0.01" required />
+
+  <label for="shippingRate">Shipping Rate</label>
+  <input type="number" id="shippingRate" min="0" step="0.01" required />
+
+  <label for="quantity">Quantity</label>
+  <input type="number" id="quantity" min="1" required />
+
+  <label for="itemId">Item ID</label>
+  <input type="text" id="itemId" required />
+
+  <label for="customerName">Customer Name</label>
+  <input type="text" id="customerName" required />
+
+  <button type="submit">Add Order</button>
+</form>
+
+<input
+  type="text"
+  id="searchBar"
+  placeholder="Search orders..."
+  title="Search all order fields"
+/>
+
+<div id="orderList"></div>
+
+<script>
+// Save form inputs in localStorage and restore on load
+const form = document.getElementById('orderForm');
+const inputs = Array.from(form.elements).filter(el => el.tagName === 'INPUT' || el.tagName === 'SELECT');
+inputs.forEach(input => {
+  const saved = localStorage.getItem('order_' + input.id);
+  if (saved) input.value = saved;
+  input.addEventListener('input', () => localStorage.setItem('order_' + input.id, input.value));
+});
+
+let orders = JSON.parse(localStorage.getItem('orders')) || [];
+
+function renderOrders(filter = '') {
+  const container = document.getElementById('orderList');
+  container.innerHTML = '';
+
+  // Filter orders by search string (case-insensitive)
+  const filtered = orders.filter(order => {
+    return Object.values(order).some(val =>
+      String(val).toLowerCase().includes(filter.toLowerCase())
+    );
+  });
+
+  filtered.forEach((order, index) => {
+    const div = document.createElement('div');
+    div.className = 'order-entry';
+
+    div.innerHTML = `
+      <div class="order-header">Order #${index + 1} - ${order.orderDate} - ${order.itemStatus}</div>
+      <div><span class="inline"><strong>Customer:</strong> ${order.customerName}</span>
+      <span class="inline"><strong>Item ID:</strong> ${order.itemId}</span>
+      <span class="inline"><strong>Quantity:</strong> ${order.quantity}</span></div>
+      <div><strong>Invoice:</strong> Payment: ${order.paymentMethod}, Price: $${parseFloat(order.price).toFixed(2)}, Tax: $${parseFloat(order.tax).toFixed(2)}, Shipping: $${parseFloat(order.shippingRate).toFixed(2)}</div>
+      <div class="order-buttons">
+        <button onclick="viewDetails(${index})">View Detail</button>
+        <button onclick="reOrder(${index})">Re-order</button>
+        <button onclick="modifyQuantity(${index})">Modify Quantity</button>
+        <button onclick="deleteOrder(${index})">Delete</button>
+      </div>
+      <div id="detail-${index}" style="display:none; margin-top:10px; font-size:0.9em; color:#555;"></div>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+function clearForm() {
+  form.reset();
+  inputs.forEach(input => localStorage.removeItem('order_' + input.id));
+}
+
+function deleteOrder(index) {
+  if (!confirm('Delete this order?')) return;
+  orders.splice(index, 1);
+  saveOrders();
+  renderOrders(document.getElementById('searchBar').value);
+}
+
+function saveOrders() {
+  localStorage.setItem('orders', JSON.stringify(orders));
+}
+
+function viewDetails(index) {
+  const detailDiv = document.getElementById(`detail-${index}`);
+  if (detailDiv.style.display === 'block') {
+    detailDiv.style.display = 'none';
+    detailDiv.innerHTML = '';
+    return;
+  }
+
+  // Example details: receipt, shipping method, history
+  const order = orders[index];
+  detailDiv.style.display = 'block';
+  detailDiv.innerHTML = `
+    <div><strong>Receipt:</strong> Order on ${order.orderDate} for ${order.quantity} item(s) at $${parseFloat(order.price).toFixed(2)} each.</div>
+    <div><strong>Shipping Method:</strong> Standard Ground</div>
+    <div><strong>History:</strong> Status changed to ${order.itemStatus}.</div>
+  `;
+}
+
+function reOrder(index) {
+  const original = orders[index];
+  const newOrder = { ...original, orderDate: new Date().toISOString().split('T')[0], itemStatus: 'pending' };
+  orders.push(newOrder);
+  saveOrders();
+  renderOrders(document.getElementById('searchBar').value);
+  alert('Re-order placed with today\'s date and status set to pending.');
+}
+
+function modifyQuantity(index) {
+  const newQty = prompt('Enter new quantity:', orders[index].quantity);
+  if (newQty && !isNaN(newQty) && Number(newQty) > 0) {
+    orders[index].quantity = Number(newQty);
+    saveOrders();
+    renderOrders(document.getElementById('searchBar').value);
+  } else {
+    alert('Invalid quantity.');
+  }
+}
+
+form.addEventListener('submit', e => {
+  e.preventDefault();
+  const newOrder = {
+    orderDate: form.orderDate.value,
+    itemStatus: form.itemStatus.value,
+    paymentMethod: form.paymentMethod.value.trim(),
+    price: parseFloat(form.price.value).toFixed(2),
+    tax: parseFloat(form.tax.value).toFixed(2),
+    shippingRate: parseFloat(form.shippingRate.value).toFixed(2),
+    quantity: Number(form.quantity.value),
+    itemId: form.itemId.value.trim(),
+    customerName: form.customerName.value.trim(),
+  };
+  orders.push(newOrder);
+  saveOrders();
+  renderOrders(document.getElementById('searchBar').value);
+  clearForm();
+});
+
+document.getElementById('searchBar').addEventListener('input', e => {
+  renderOrders(e.target.value);
+});
+
+renderOrders();
+</script>
+
+</body>
+</html>
