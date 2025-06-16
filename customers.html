@@ -1,72 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Manage Customers</title>
-<style>
-  table { border-collapse: collapse; width: 100%; margin-top: 1em; }
-  th, td { border: 1px solid #999; padding: 5px; }
-  nav a { margin-right: 10px; }
-</style>
-<script>
-  function loadCustomers() {
-    const table = document.getElementById("customer_table");
-    const customers = JSON.parse(localStorage.getItem("customers") || "[]");
-    table.innerHTML = `
-      <tr>
-        <th>ID</th><th>First Name</th><th>Last Name</th><th>Company</th>
-        <th>Country</th><th>City</th><th>Postal Code</th><th>Phone</th><th>Action</th>
-      </tr>`;
-    customers.forEach((c, i) => {
-      const row = table.insertRow();
-      row.innerHTML = `
-        <td>${c.customer_id}</td>
-        <td>${c.first_name}</td>
-        <td>${c.last_name}</td>
-        <td>${c.company_name}</td>
-        <td>${c.country}</td>
-        <td>${c.city}</td>
-        <td>${c.postal_code}</td>
-        <td>${c.phone_number}</td>
-        <td><button onclick="deleteCustomer(${i})">Delete</button></td>`;
-    });
-  }
-
-  function addCustomer(event) {
-    event.preventDefault();
-    const newCustomer = {
-      customer_id: document.getElementById("customer_id").value.trim(),
-      first_name: document.getElementById("first_name").value.trim(),
-      last_name: document.getElementById("last_name").value.trim(),
-      company_name: document.getElementById("company_name").value.trim(),
-      country: document.getElementById("country").value.trim(),
-      city: document.getElementById("city").value.trim(),
-      postal_code: document.getElementById("postal_code").value.trim(),
-      phone_number: document.getElementById("phone_number").value.trim()
-    };
-
-    if (!newCustomer.customer_id) {
-      alert("Customer ID is required");
-      return;
+  <meta charset="UTF-8">
+  <title>Customers</title>
+  <style>
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #999; padding: 8px; }
+    .btn { margin: 2px; }
+  </style>
+  <script>
+    function loadEmployees() {
+      const table = document.getElementById("employee_table");
+      const data = JSON.parse(localStorage.getItem("employees") || "[]");
+      table.innerHTML = `<tr><th>Employee ID</th><th>First Name</th><th>Last Name</th><th>Phone</th><th>Actions</th></tr>`;
+      data.forEach((emp, index) => {
+        const row = table.insertRow();
+        row.innerHTML = `<td>${emp.employee_id}</td><td>${emp.first_name}</td><td>${emp.last_name}</td><td>${emp.phone}</td>
+          <td><button onclick="deleteEmployee(${index})">Delete</button></td>`;
+      });
     }
 
-    let customers = JSON.parse(localStorage.getItem("customers") || "[]");
-    customers.push(newCustomer);
-    localStorage.setItem("customers", JSON.stringify(customers));
+    function addEmployee() {
+      const newEmp = {
+        employee_id: document.getElementById("employee_id").value,
+        first_name: document.getElementById("first_name").value,
+        last_name: document.getElementById("last_name").value,
+        phone: document.getElementById("phone").value
+      };
+      const employees = JSON.parse(localStorage.getItem("employees") || "[]");
+      employees.push(newEmp);
+      localStorage.setItem("employees", JSON.stringify(employees));
+      loadEmployees();
+    }
 
-    event.target.reset();
-    loadCustomers();
-  }
+    function deleteEmployee(index) {
+      const employees = JSON.parse(localStorage.getItem("employees") || "[]");
+      employees.splice(index, 1);
+      localStorage.setItem("employees", JSON.stringify(employees));
+      loadEmployees();
+    }
 
-  function deleteCustomer(index) {
-    let customers = JSON.parse(localStorage.getItem("customers") || "[]");
-    customers.splice(index, 1);
-    localStorage.setItem("customers", JSON.stringify(customers));
-    loadCustomers();
-  }
+    function searchEmployee() {
+      const query = document.getElementById("search_query").value.toLowerCase();
+      const rows = document.querySelectorAll("#employee_table tr:not(:first-child)");
+      rows.forEach(row => {
+        const match = [...row.cells].some(td => td.textContent.toLowerCase().includes(query));
+        row.style.display = match ? "" : "none";
+      });
+    }
 
-  window.onload = loadCustomers;
-</script>
+    window.onload = loadEmployees;
+  </script>
 </head>
 <body>
   <nav>
@@ -75,23 +59,19 @@
     <a href="employee.html">Employee</a> |
     <a href="product.html">Product</a> |
     <a href="orders.html">Orders</a>
+    <input type="text" id="search_query" placeholder="Search..." oninput="searchEmployee()">
   </nav>
 
-  <h1>Manage Customers</h1>
-
-  <form onsubmit="addCustomer(event)">
-    <label>Customer ID: <input id="customer_id" required></label><br>
-    <label>First Name: <input id="first_name" required></label><br>
-    <label>Last Name: <input id="last_name" required></label><br>
-    <label>Company Name: <input id="company_name"></label><br>
-    <label>Country: <input id="country"></label><br>
-    <label>City: <input id="city"></label><br>
-    <label>Postal Code: <input id="postal_code"></label><br>
-    <label>Phone Number: <input id="phone_number"></label><br>
-    <button type="submit">Add Customer</button>
+  <h1>Orders</h1>
+  <form onsubmit="event.preventDefault(); addEmployee();">
+    <label>Employee ID: <input type="text" id="employee_id" required></label><br>
+    <label>First Name: <input type="text" id="first_name" required></label><br>
+    <label>Last Name: <input type="text" id="last_name" required></label><br>
+    <label>Phone: <input type="text" id="phone" required></label><br>
+    <button type="submit">Submit</button>
   </form>
 
-  <h2>Saved Customers</h2>
-  <table id="customer_table"></table>
+  <h2>Saved Employees</h2>
+  <table id="employee_table"></table>
 </body>
 </html>
