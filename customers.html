@@ -4,115 +4,133 @@
   <meta charset="UTF-8" />
   <title>Customers</title>
   <style>
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #999; padding: 6px; text-align: left; }
-    button { margin: 2px; }
-    nav a { margin-right: 10px; }
+    form > div { margin-bottom: 8px; }
+    table, th, td { border: 1px solid #ddd; border-collapse: collapse; padding: 5px; }
+    th { background-color: #f0f0f0; }
+    .entry { margin-top: 10px; }
+    button { cursor: pointer; }
   </style>
-  <script>
-    function loadCustomers() {
-      const table = document.getElementById("customer_table");
-      const data = JSON.parse(localStorage.getItem("customers") || "[]");
-      table.innerHTML = `<tr>
-        <th>Customer ID</th><th>First Name</th><th>Last Name</th><th>Company</th><th>Country</th><th>City</th><th>Postal Code</th><th>Phone</th><th>Actions</th>
-      </tr>`;
-      data.forEach((cust, index) => {
-        const row = table.insertRow();
-        row.innerHTML = `
-          <td>${cust.customer_id}</td>
-          <td>${cust.first_name}</td>
-          <td>${cust.last_name}</td>
-          <td>${cust.company_name}</td>
-          <td>${cust.country}</td>
-          <td>${cust.city}</td>
-          <td>${cust.postal_code}</td>
-          <td>${cust.phone_number}</td>
-          <td><button onclick="deleteCustomer(${index})">Delete</button></td>`;
-      });
-    }
-
-    function addCustomer() {
-      const newCust = {
-        customer_id: document.getElementById("customer_id").value.trim(),
-        first_name: document.getElementById("first_name").value.trim(),
-        last_name: document.getElementById("last_name").value.trim(),
-        company_name: document.getElementById("company_name").value.trim(),
-        country: document.getElementById("country").value.trim(),
-        city: document.getElementById("city").value.trim(),
-        postal_code: document.getElementById("postal_code").value.trim(),
-        phone_number: document.getElementById("phone_number").value.trim()
-      };
-
-      if (!newCust.customer_id || !newCust.first_name || !newCust.last_name) {
-        alert("Please fill in required fields.");
-        return;
-      }
-
-      const customers = JSON.parse(localStorage.getItem("customers") || "[]");
-      customers.push(newCust);
-      localStorage.setItem("customers", JSON.stringify(customers));
-
-      document.getElementById("customer_form").reset();
-      loadCustomers();
-    }
-
-    function deleteCustomer(index) {
-      const customers = JSON.parse(localStorage.getItem("customers") || "[]");
-      customers.splice(index, 1);
-      localStorage.setItem("customers", JSON.stringify(customers));
-      loadCustomers();
-    }
-
-    function searchCustomer() {
-      const query = document.getElementById("search_input").value.toLowerCase();
-      const table = document.getElementById("customer_table");
-      const rows = table.getElementsByTagName("tr");
-
-      for (let i = 1; i < rows.length; i++) {
-        const cells = rows[i].getElementsByTagName("td");
-        let found = false;
-        for (let j = 0; j < cells.length - 1; j++) { // exclude actions
-          if (cells[j].textContent.toLowerCase().includes(query)) {
-            found = true;
-            break;
-          }
-        }
-        rows[i].style.display = found ? "" : "none";
-      }
-    }
-
-    window.onload = loadCustomers;
-  </script>
 </head>
 <body>
-  <nav>
-    <a href="dashboard.html">Dashboard</a>
-    <a href="customers.html">Customers</a>
-    <a href="employee.html">Employee</a>
-    <a href="product.html">Product</a>
-    <a href="orders.html">Orders</a>
-  </nav>
 
-  <h1>Customers</h1>
+<nav>
+  <ul style="list-style:none; display:flex; gap:10px;">
+    <li><a href="customers.html">Customers</a></li>
+    <li><a href="product.html">Products</a></li>
+    <li><a href="employee.html">Employees</a></li>
+    <li><a href="orders.html">Orders</a></li>
+  </ul>
+</nav>
+<hr>
 
-  <form id="customer_form" onsubmit="event.preventDefault(); addCustomer();">
-    <label>Customer ID: <input type="text" id="customer_id" required></label><br>
-    <label>First Name: <input type="text" id="first_name" required></label><br>
-    <label>Last Name: <input type="text" id="last_name" required></label><br>
-    <label>Company Name: <input type="text" id="company_name"></label><br>
-    <label>Country: <input type="text" id="country"></label><br>
-    <label>City: <input type="text" id="city"></label><br>
-    <label>Postal Code: <input type="text" id="postal_code"></label><br>
-    <label>Phone Number: <input type="text" id="phone_number"></label><br>
-    <button type="submit">Submit</button>
-  </form>
+<h1>Customers</h1>
 
-  <div style="margin-top: 10px;">
-    <input type="text" id="search_input" placeholder="Search Customers..." />
-    <button type="button" onclick="searchCustomer()">Search</button>
-  </div>
+<form id="customerForm">
+  <div><label>First Name: <input type="text" id="firstName" required></label></div>
+  <div><label>Last Name: <input type="text" id="lastName" required></label></div>
+  <div><label>Address: <input type="text" id="address"></label></div>
+  <div><label>City: <input type="text" id="city"></label></div>
+  <div><label>State: <input type="text" id="state"></label></div>
+  <div><label>Postal Code: <input type="text" id="postalCode"></label></div>
+  <div><label>Country Code: <input type="text" id="countryCode"></label></div>
+  <div><label>Phone: <input type="text" id="phone"></label></div>
+  <div><label>Email: <input type="email" id="email"></label></div>
+  <div><label>Password: <input type="password" id="password"></label></div>
+  <button type="submit">Add Customer</button>
+</form>
 
-  <h2>Saved Customers</h2>
-  <table id="customer_table"></table>
+<div style="margin-top: 10px;">
+  <input type="text" id="searchInput" placeholder="Search customers..." style="width: 300px; padding:5px;">
+</div>
+
+<div id="entries" class="entry"></div>
+
+<script>
+  // Helper: Save inputs to localStorage on change
+  const inputs = ['firstName','lastName','address','city','state','postalCode','countryCode','phone','email','password'];
+  inputs.forEach(id => {
+    const el = document.getElementById(id);
+    el.value = localStorage.getItem('customer_' + id) || '';
+    el.addEventListener('input', () => {
+      localStorage.setItem('customer_' + id, el.value);
+    });
+  });
+
+  const form = document.getElementById('customerForm');
+  const entriesDiv = document.getElementById('entries');
+  let customers = JSON.parse(localStorage.getItem('customers')) || [];
+
+  function saveCustomers() {
+    localStorage.setItem('customers', JSON.stringify(customers));
+  }
+
+  function clearInputs() {
+    inputs.forEach(id => {
+      document.getElementById(id).value = '';
+      localStorage.removeItem('customer_' + id);
+    });
+  }
+
+  function renderList(filter='') {
+    const filtered = customers.filter(c => {
+      const combined = Object.values(c).join(' ').toLowerCase();
+      return combined.includes(filter.toLowerCase());
+    });
+    if (filtered.length === 0) {
+      entriesDiv.innerHTML = '<p>No customers found.</p>';
+      return;
+    }
+    let html = '<table><thead><tr>';
+    inputs.forEach(id => {
+      html += `<th>${id.charAt(0).toUpperCase() + id.slice(1)}</th>`;
+    });
+    html += '<th>Actions</th></tr></thead><tbody>';
+    filtered.forEach((c, i) => {
+      html += '<tr>';
+      inputs.forEach(id => {
+        html += `<td>${c[id] || ''}</td>`;
+      });
+      html += `<td><button data-index="${i}" class="deleteBtn">Delete</button></td></tr>`;
+    });
+    html += '</tbody></table>';
+    entriesDiv.innerHTML = html;
+
+    // Attach delete handlers
+    document.querySelectorAll('.deleteBtn').forEach(btn => {
+      btn.onclick = () => {
+        customers.splice(btn.dataset.index, 1);
+        saveCustomers();
+        renderList(document.getElementById('searchInput').value);
+      };
+    });
+  }
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const newCustomer = {};
+    let valid = true;
+    inputs.forEach(id => {
+      const val = document.getElementById(id).value.trim();
+      if ((id === 'firstName' || id === 'lastName') && val === '') valid = false;
+      newCustomer[id] = val;
+    });
+    if (!valid) {
+      alert('First and Last Name are required.');
+      return;
+    }
+    customers.push(newCustomer);
+    saveCustomers();
+    renderList();
+    clearInputs();
+  });
+
+  document.getElementById('searchInput').addEventListener('input', e => {
+    renderList(e.target.value);
+  });
+
+  // Initial render
+  renderList();
+</script>
+
 </body>
 </html>
