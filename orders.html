@@ -44,30 +44,45 @@
     <option value="cancelled">Cancelled</option>
   </select>
 
-  <label for="paymentMethod">Payment Method</label>
-  <input type="text" id="paymentMethod" placeholder="e.g. Credit Card" required />
+<form id="orderForm" onsubmit="event.preventDefault(); addOrder();">
+  <label for="orderId">Order ID:</label><br>
+  <input type="text" id="orderId" required><br><br>
 
-  <label for="price">Price</label>
-  <input type="number" id="price" min="0" step="0.01" required />
+  <label for="orderDate">Order Date:</label><br>
+  <input type="date" id="orderDate" required><br><br>
 
-  <label for="tax">Tax</label>
-  <input type="number" id="tax" min="0" step="0.01" required />
+  <label for="itemId">Item ID:</label><br>
+  <input type="text" id="itemId" required><br><br>
 
-  <label for="shippingRate">Shipping Rate</label>
-  <input type="number" id="shippingRate" min="0" step="0.01" required />
+  <label for="productName">Product Name:</label><br>
+  <input type="text" id="productName" required><br><br>
 
-  <label for="quantity">Quantity</label>
-  <input type="number" id="quantity" min="1" required />
+  <label for="quantity">Quantity (kg):</label><br>
+  <input type="number" id="quantity" required><br><br>
 
-  <<!-- Inside <form id="orderForm"> replace the bottom fields with this -->
-  <label for="itemId">Item ID</label>
-  <input type="text" id="itemId" required />
+  <label for="itemStatus">Item Status:</label><br>
+  <select id="itemStatus" required>
+    <option value="pending">Pending</option>
+    <option value="shipped">Shipped</option>
+    <option value="delivered">Delivered</option>
+    <option value="cancelled">Cancelled</option>
+  </select><br><br>
 
-  <label for="customerName">Customer Name</label>
-  <input type="text" id="customerName" required />
+  <label for="customerName">Customer Name:</label><br>
+  <input type="text" id="customerName" required><br><br>
 
-  <button type="submit">Add Order</button>
+  <label for="storageLocation">Storage Location:</label><br>
+  <input type="text" id="storageLocation" required><br><br>
+
+  <label for="destination">Destination:</label><br>
+  <input type="text" id="destination" required><br><br>
+
+  <button type="submit">Add Order</button><br><br>
+
+  <label for="searchBar">Search All Fields:</label><br>
+  <input type="text" id="searchBar" placeholder="Search orders..." oninput="searchOrders()">
 </form>
+
 
 <input
   type="text"
