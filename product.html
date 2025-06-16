@@ -9,19 +9,21 @@
     th { background-color: #f0f0f0; }
     .entry { margin-top: 10px; }
     button { cursor: pointer; }
+    nav ul { list-style:none; display:flex; gap:10px; padding:0; margin:0; background:#333; }
+    nav a { color: white; text-decoration:none; padding: 8px 12px; display:block; }
+    nav a:hover { background:#555; }
   </style>
 </head>
 <body>
 
 <nav>
-  <ul style="list-style:none; display:flex; gap:10px;">
+  <ul>
     <li><a href="customers.html">Customers</a></li>
     <li><a href="product.html">Products</a></li>
     <li><a href="employee.html">Employees</a></li>
     <li><a href="orders.html">Orders</a></li>
   </ul>
 </nav>
-<hr>
 
 <h1>Products</h1>
 
@@ -29,7 +31,7 @@
   <div><label>Product Name: <input type="text" id="productName" required></label></div>
   <div><label>Product ID: <input type="text" id="productId" required></label></div>
   <div><label>Price: <input type="number" id="price" min="0" step="0.01" required></label></div>
-  <div><label>Stock Quantity(kg): <input type="number" id="stockQuantity" min="0" step="1"></label></div>
+  <div><label>Stock Quantity (kg): <input type="number" id="stockQuantity" min="0" step="1"></label></div>
   <button type="submit">Add Product</button>
 </form>
 
@@ -40,10 +42,14 @@
 <div id="entries" class="entry"></div>
 
 <script>
-  const inputs = ['productName','productId','price','category','stockQuantity','description'];
+  // Only inputs present in the form
+  const inputs = ['productName','productId','price','stockQuantity'];
+
   inputs.forEach(id => {
     const el = document.getElementById(id);
-    el.value = localStorage.getItem('product_' + id) || '';
+    if (!el) return;
+    const saved = localStorage.getItem('product_' + id);
+    if (saved) el.value = saved;
     el.addEventListener('input', () => {
       localStorage.setItem('product_' + id, el.value);
     });
@@ -59,26 +65,32 @@
 
   function clearInputs() {
     inputs.forEach(id => {
-      document.getElementById(id).value = '';
-      localStorage.removeItem('product_' + id);
+      const el = document.getElementById(id);
+      if (el) {
+        el.value = '';
+        localStorage.removeItem('product_' + id);
+      }
     });
   }
 
-  function renderList(filter='') {
+  function renderList(filter = '') {
     const filtered = products.filter(p => {
       const combined = Object.values(p).join(' ').toLowerCase();
       return combined.includes(filter.toLowerCase());
     });
+
     if (filtered.length === 0) {
       entriesDiv.innerHTML = '<p>No products found.</p>';
       return;
     }
+
     let html = '<table><thead><tr>';
     inputs.forEach(id => {
-      let label = id.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+      const label = id.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
       html += `<th>${label}</th>`;
     });
     html += '<th>Actions</th></tr></thead><tbody>';
+
     filtered.forEach((p, i) => {
       html += '<tr>';
       inputs.forEach(id => {
@@ -86,6 +98,7 @@
       });
       html += `<td><button data-index="${i}" class="deleteBtn">Delete</button></td></tr>`;
     });
+
     html += '</tbody></table>';
     entriesDiv.innerHTML = html;
 
@@ -102,15 +115,18 @@
     e.preventDefault();
     const newProduct = {};
     let valid = true;
+
     inputs.forEach(id => {
       const val = document.getElementById(id).value.trim();
       if ((id === 'productName' || id === 'productId' || id === 'price') && val === '') valid = false;
       newProduct[id] = val;
     });
+
     if (!valid) {
       alert('Product Name, Product ID, and Price are required.');
       return;
     }
+
     products.push(newProduct);
     saveProducts();
     renderList();
