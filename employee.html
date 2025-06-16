@@ -6,29 +6,28 @@
   <style>
     table { border-collapse: collapse; width: 100%; }
     th, td { border: 1px solid #999; padding: 8px; }
-    .btn { margin: 2px; }
   </style>
   <script>
     function loadEmployees() {
       const table = document.getElementById("employee_table");
       const data = JSON.parse(localStorage.getItem("employees") || "[]");
-      table.innerHTML = `<tr><th>Employee ID</th><th>First Name</th><th>Last Name</th><th>Phone</th><th>Actions</th></tr>`;
-      data.forEach((emp, index) => {
+      table.innerHTML = `<tr><th>ID</th><th>First Name</th><th>Last Name</th><th>Phone</th><th>Actions</th></tr>`;
+      data.forEach((e, i) => {
         const row = table.insertRow();
-        row.innerHTML = `<td>${emp.employee_id}</td><td>${emp.first_name}</td><td>${emp.last_name}</td><td>${emp.phone}</td>
-          <td><button onclick="deleteEmployee(${index})">Delete</button></td>`;
+        row.innerHTML = `<td>${e.id}</td><td>${e.first}</td><td>${e.last}</td><td>${e.phone}</td>
+        <td><button onclick="deleteEmployee(${i})">Delete</button></td>`;
       });
     }
 
     function addEmployee() {
-      const newEmp = {
-        employee_id: document.getElementById("employee_id").value,
-        first_name: document.getElementById("first_name").value,
-        last_name: document.getElementById("last_name").value,
+      const e = {
+        id: document.getElementById("id").value,
+        first: document.getElementById("first").value,
+        last: document.getElementById("last").value,
         phone: document.getElementById("phone").value
       };
       const employees = JSON.parse(localStorage.getItem("employees") || "[]");
-      employees.push(newEmp);
+      employees.push(e);
       localStorage.setItem("employees", JSON.stringify(employees));
       loadEmployees();
     }
@@ -41,10 +40,10 @@
     }
 
     function searchEmployee() {
-      const query = document.getElementById("search_query").value.toLowerCase();
+      const q = document.getElementById("search_query").value.toLowerCase();
       const rows = document.querySelectorAll("#employee_table tr:not(:first-child)");
       rows.forEach(row => {
-        const match = [...row.cells].some(td => td.textContent.toLowerCase().includes(query));
+        const match = [...row.cells].some(td => td.textContent.toLowerCase().includes(q));
         row.style.display = match ? "" : "none";
       });
     }
@@ -61,15 +60,14 @@
     <a href="orders.html">Orders</a>
   </nav>
 
-  <h1>Orders</h1>
+  <h1>Employee</h1>
   <form onsubmit="event.preventDefault(); addEmployee();">
-    <label>Employee ID: <input type="text" id="employee_id" required></label><br>
-    <label>First Name: <input type="text" id="first_name" required></label><br>
-    <label>Last Name: <input type="text" id="last_name" required></label><br>
-    <label>Phone: <input type="text" id="phone" required></label><br>
-    <button type="submit">Submit</button>
-    <br><br>
-    <label>Search All Records: <input type="text" id="search_query" placeholder="Search..." oninput="searchEmployee()"></label>
+    <label>ID: <input type="text" id="id" required></label><br>
+    <label>First Name: <input type="text" id="first" required></label><br>
+    <label>Last Name: <input type="text" id="last" required></label><br>
+    <label>Phone Number: <input type="text" id="phone" required></label><br>
+    <button type="submit">Submit</button><br><br>
+    <label>Search All Records: <input type="text" id="search_query" oninput="searchEmployee()" placeholder="Search..."></label>
   </form>
 
   <h2>Saved Employees</h2>
