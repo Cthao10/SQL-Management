@@ -9,19 +9,35 @@
     th { background-color: #f0f0f0; }
     .entry { margin-top: 10px; }
     button { cursor: pointer; }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 10px;
+      padding: 0;
+      margin: 0 0 10px 0;
+      background: #333;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      padding: 8px 12px;
+      display: block;
+    }
+    nav a:hover {
+      background: #555;
+    }
   </style>
 </head>
 <body>
 
 <nav>
-  <ul style="list-style:none; display:flex; gap:10px;">
+  <ul>
     <li><a href="customers.html">Customers</a></li>
     <li><a href="product.html">Products</a></li>
     <li><a href="employee.html">Employees</a></li>
     <li><a href="orders.html">Orders</a></li>
   </ul>
 </nav>
-<hr>
 
 <h1>Customers</h1>
 
@@ -39,7 +55,7 @@
 </form>
 
 <div style="margin-top: 10px;">
-  <input type="text" id="searchInput" placeholder="Search customers..." style="width: 300px; padding:5px;" onkeydown="return event.key !== 'Enter';">
+  <input type="text" id="searchInput" placeholder="Search customers..." style="width: 300px; padding:5px;">
 </div>
 
 <div id="entries" class="entry"></div>
@@ -50,7 +66,7 @@
     'phone', 'email', 'product', 'productQuantity'
   ];
 
-  // Preload saved inputs
+  // Restore form fields from localStorage
   inputs.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
@@ -81,10 +97,9 @@
   }
 
   function renderList(filter = '') {
-    const filtered = customers.filter(c => {
-      const values = Object.values(c).join(' ').toLowerCase();
-      return values.includes(filter.toLowerCase());
-    });
+    const filtered = customers.filter(c =>
+      Object.values(c).join(' ').toLowerCase().includes(filter.toLowerCase())
+    );
 
     if (filtered.length === 0) {
       entriesDiv.innerHTML = '<p>No customers found.</p>';
@@ -93,7 +108,8 @@
 
     let html = '<table><thead><tr>';
     inputs.forEach(id => {
-      html += `<th>${id.replace(/([A-Z])/g, ' $1')}</th>`;
+      const label = id.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+      html += `<th>${label}</th>`;
     });
     html += '<th>Actions</th></tr></thead><tbody>';
 
@@ -139,8 +155,13 @@
     clearInputs();
   });
 
-  searchInput.addEventListener('input', e => {
-    renderList(e.target.value);
+  searchInput.addEventListener('input', () => {
+    renderList(searchInput.value);
+  });
+
+  // Prevent Enter key from submitting form inside the search box
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') e.preventDefault();
   });
 
   renderList();
