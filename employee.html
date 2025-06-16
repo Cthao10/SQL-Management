@@ -9,19 +9,35 @@
     th { background-color: #f0f0f0; }
     .entry { margin-top: 10px; }
     button { cursor: pointer; }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 10px;
+      padding: 0;
+      margin: 0 0 10px 0;
+      background: #333;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      padding: 8px 12px;
+      display: block;
+    }
+    nav a:hover {
+      background: #555;
+    }
   </style>
 </head>
 <body>
 
 <nav>
-  <ul style="list-style:none; display:flex; gap:10px;">
+  <ul>
     <li><a href="customers.html">Customers</a></li>
     <li><a href="product.html">Products</a></li>
     <li><a href="employee.html">Employees</a></li>
     <li><a href="orders.html">Orders</a></li>
   </ul>
 </nav>
-<hr>
 
 <h1>Employees</h1>
 
@@ -42,10 +58,12 @@
 <div id="entries" class="entry"></div>
 
 <script>
-  const inputs = ['firstName','lastName','employeeId','department','email','phone'];
+  const inputs = ['firstName', 'lastName', 'employeeId', 'department', 'email', 'phone'];
   inputs.forEach(id => {
     const el = document.getElementById(id);
-    el.value = localStorage.getItem('employee_' + id) || '';
+    if (!el) return;
+    const saved = localStorage.getItem('employee_' + id);
+    if (saved) el.value = saved;
     el.addEventListener('input', () => {
       localStorage.setItem('employee_' + id, el.value);
     });
@@ -61,69 +79,23 @@
 
   function clearInputs() {
     inputs.forEach(id => {
-      document.getElementById(id).value = '';
-      localStorage.removeItem('employee_' + id);
+      const el = document.getElementById(id);
+      if (el) {
+        el.value = '';
+        localStorage.removeItem('employee_' + id);
+      }
     });
   }
 
-  function renderList(filter='') {
+  function renderList(filter = '') {
     const filtered = employees.filter(e => {
-      const combined = Object.values(e).join(' ').toLowerCase();
-      return combined.includes(filter.toLowerCase());
+      return Object.values(e).join(' ').toLowerCase().includes(filter.toLowerCase());
     });
+
     if (filtered.length === 0) {
       entriesDiv.innerHTML = '<p>No employees found.</p>';
       return;
     }
+
     let html = '<table><thead><tr>';
-    inputs.forEach(id => {
-      html += `<th>${id.charAt(0).toUpperCase() + id.slice(1)}</th>`;
-    });
-    html += '<th>Actions</th></tr></thead><tbody>';
-    filtered.forEach((e, i) => {
-      html += '<tr>';
-      inputs.forEach(id => {
-        html += `<td>${e[id] || ''}</td>`;
-      });
-      html += `<td><button data-index="${i}" class="deleteBtn">Delete</button></td></tr>`;
-    });
-    html += '</tbody></table>';
-    entriesDiv.innerHTML = html;
-
-    document.querySelectorAll('.deleteBtn').forEach(btn => {
-      btn.onclick = () => {
-        employees.splice(btn.dataset.index, 1);
-        saveEmployees();
-        renderList(document.getElementById('searchInput').value);
-      };
-    });
-  }
-
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    const newEmployee = {};
-    let valid = true;
-    inputs.forEach(id => {
-      const val = document.getElementById(id).value.trim();
-      if ((id === 'firstName' || id === 'lastName' || id === 'employeeId') && val === '') valid = false;
-      newEmployee[id] = val;
-    });
-    if (!valid) {
-      alert('First Name, Last Name, and Employee ID are required.');
-      return;
-    }
-    employees.push(newEmployee);
-    saveEmployees();
-    renderList();
-    clearInputs();
-  });
-
-  document.getElementById('searchInput').addEventListener('input', e => {
-    renderList(e.target.value);
-  });
-
-  renderList();
-</script>
-
-</body>
-</html>
+    inputs.forEach
