@@ -6,73 +6,111 @@
   <style>
     table { border-collapse: collapse; width: 100%; }
     th, td { border: 1px solid #999; padding: 8px; }
-    .btn { margin: 2px; }
+    nav a { margin-right: 10px; }
   </style>
   <script>
-    function loadEmployees() {
-      const table = document.getElementById("employee_table");
-      const data = JSON.parse(localStorage.getItem("employees") || "[]");
-      table.innerHTML = `<tr><th>Employee ID</th><th>First Name</th><th>Last Name</th><th>Phone</th><th>Actions</th></tr>`;
-      data.forEach((emp, index) => {
-        const row = table.insertRow();
-        row.innerHTML = `<td>${emp.employee_id}</td><td>${emp.first_name}</td><td>${emp.last_name}</td><td>${emp.phone}</td>
-          <td><button onclick="deleteEmployee(${index})">Delete</button></td>`;
+    function load() {
+      const table = document.getElementById("orders_table");
+      const data = JSON.parse(localStorage.getItem("orders") || "[]");
+      table.innerHTML = `<tr><th>Order ID</th><th>Customer</th><th>Item</th><th>Qty</th><th>Status</th><th>Date</th><th>Invoice</th><th>Action</th></tr>`;
+      data.forEach((o, i) => {
+        table.innerHTML += `<tr>
+          <td>${o.order_id}</td>
+          <td>${o.customer}</td>
+          <td>${o.item}</td>
+          <td>${o.qty}</td>
+          <td>${o.status}</td>
+          <td>${o.date}</td>
+          <td>Payment: ${o.payment}<br>Price: $${o.price}<br>Tax: $${o.tax}<br>Ship: $${o.ship}</td>
+          <td>
+            <button onclick="viewDetail(${i})">View</button>
+            <button onclick="del(${i})">Delete</button>
+          </td>
+        </tr>`;
       });
     }
 
-    function addEmployee() {
-      const newEmp = {
-        employee_id: document.getElementById("employee_id").value,
-        first_name: document.getElementById("first_name").value,
-        last_name: document.getElementById("last_name").value,
-        phone: document.getElementById("phone").value
+    function add() {
+      const o = {
+        order_id: order_id.value,
+        customer: customer.value,
+        item: item.value,
+        qty: qty.value,
+        status: status.value,
+        date: date.value,
+        payment: payment.value,
+        price: price.value,
+        tax: tax.value,
+        ship: ship.value
       };
-      const employees = JSON.parse(localStorage.getItem("employees") || "[]");
-      employees.push(newEmp);
-      localStorage.setItem("employees", JSON.stringify(employees));
-      loadEmployees();
+      const all = JSON.parse(localStorage.getItem("orders") || "[]");
+      all.push(o);
+      localStorage.setItem("orders", JSON.stringify(all));
+      load();
     }
 
-    function deleteEmployee(index) {
-      const employees = JSON.parse(localStorage.getItem("employees") || "[]");
-      employees.splice(index, 1);
-      localStorage.setItem("employees", JSON.stringify(employees));
-      loadEmployees();
+    function del(i) {
+      const all = JSON.parse(localStorage.getItem("orders") || "[]");
+      all.splice(i, 1);
+      localStorage.setItem("orders", JSON.stringify(all));
+      load();
     }
 
-    function searchEmployee() {
-      const query = document.getElementById("search_query").value.toLowerCase();
-      const rows = document.querySelectorAll("#employee_table tr:not(:first-child)");
-      rows.forEach(row => {
-        const match = [...row.cells].some(td => td.textContent.toLowerCase().includes(query));
-        row.style.display = match ? "" : "none";
+    function viewDetail(i) {
+      const o = JSON.parse(localStorage.getItem("orders"))[i];
+      alert(`Order ID: ${o.order_id}
+Customer: ${o.customer}
+Item: ${o.item}
+Qty: ${o.qty}
+Status: ${o.status}
+Date: ${o.date}
+Payment: ${o.payment}
+Price: $${o.price}
+Tax: $${o.tax}
+Shipping: $${o.ship}`);
+    }
+
+    function search() {
+      const q = search_input.value.toLowerCase();
+      document.querySelectorAll("#orders_table tr:not(:first-child)").forEach(row => {
+        row.style.display = [...row.cells].some(td => td.textContent.toLowerCase().includes(q)) ? "" : "none";
       });
     }
 
-    window.onload = loadEmployees;
+    window.onload = load;
   </script>
 </head>
 <body>
   <nav>
-    <a href="dashboard.html">Dashboard</a> |
-    <a href="customers.html">Customers</a> |
-    <a href="employee.html">Employee</a> |
-    <a href="product.html">Product</a> |
+    <a href="dashboard.html">Dashboard</a>
+    <a href="customers.html">Customers</a>
+    <a href="employee.html">Employee</a>
+    <a href="product.html">Product</a>
     <a href="orders.html">Orders</a>
   </nav>
 
   <h1>Orders</h1>
-  <form onsubmit="event.preventDefault(); addEmployee();">
-    <label>Employee ID: <input type="text" id="employee_id" required></label><br>
-    <label>First Name: <input type="text" id="first_name" required></label><br>
-    <label>Last Name: <input type="text" id="last_name" required></label><br>
-    <label>Phone: <input type="text" id="phone" required></label><br>
-    <button type="submit">Submit</button>
-    <br><br>
-    <label>Search All Records: <input type="text" id="search_query" placeholder="Search..." oninput="searchEmployee()"></label>
+  <form onsubmit="event.preventDefault(); add();">
+    <label>Order ID: <input type="text" id="order_id" required></label><br>
+    <label>Customer: <input type="text" id="customer" required></label><br>
+    <label>Item: <input type="text" id="item" required></label><br>
+    <label>Qty: <input type="number" id="qty" required></label><br>
+    <label>Status: 
+      <select id="status">
+        <option>Pending</option>
+        <option>Shipped</option>
+        <option>Delivered</option>
+        <option>Cancelled</option>
+      </select>
+    </label><br>
+    <label>Date: <input type="date" id="date" required></label><br>
+    <label>Payment Method: <input type="text" id="payment" required></label><br>
+    <label>Price: <input type="number" id="price" required></label><br>
+    <label>Tax: <input type="number" id="tax" required></label><br>
+    <label>Shipping: <input type="number" id="ship" required></label><br>
+    <button type="submit">Submit</button><br><br>
+    <label>Search: <input type="text" id="search_input" oninput="search()" placeholder="Search..."></label>
   </form>
-
-  <h2>Saved  Orders</h2>
   <table id="orders_table"></table>
 </body>
 </html>
