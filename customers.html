@@ -1,47 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Customers</title>
   <style>
     table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #999; padding: 8px; }
+    th, td { border: 1px solid #999; padding: 6px; text-align: left; }
+    button { margin: 2px; }
     nav a { margin-right: 10px; }
   </style>
   <script>
     function loadCustomers() {
       const table = document.getElementById("customer_table");
       const data = JSON.parse(localStorage.getItem("customers") || "[]");
-      table.innerHTML = `<tr><th>ID</th><th>First</th><th>Last</th><th>Company</th><th>Country</th><th>City</th><th>Postal</th><th>Phone</th><th>Action</th></tr>`;
-      data.forEach((c, i) => {
-        table.innerHTML += `<tr><td>${c.id}</td><td>${c.first}</td><td>${c.last}</td><td>${c.company}</td><td>${c.country}</td><td>${c.city}</td><td>${c.postal}</td><td>${c.phone}</td>
-        <td><button onclick="delCustomer(${i})">Delete</button></td></tr>`;
+      table.innerHTML = `<tr>
+        <th>Customer ID</th><th>First Name</th><th>Last Name</th><th>Company</th><th>Country</th><th>City</th><th>Postal Code</th><th>Phone</th><th>Actions</th>
+      </tr>`;
+      data.forEach((cust, index) => {
+        const row = table.insertRow();
+        row.innerHTML = `
+          <td>${cust.customer_id}</td>
+          <td>${cust.first_name}</td>
+          <td>${cust.last_name}</td>
+          <td>${cust.company_name}</td>
+          <td>${cust.country}</td>
+          <td>${cust.city}</td>
+          <td>${cust.postal_code}</td>
+          <td>${cust.phone_number}</td>
+          <td><button onclick="deleteCustomer(${index})">Delete</button></td>`;
       });
     }
 
     function addCustomer() {
-      const c = {
-        id: id.value, first: first.value, last: last.value, company: company.value,
-        country: country.value, city: city.value, postal: postal.value, phone: phone.value
+      const newCust = {
+        customer_id: document.getElementById("customer_id").value.trim(),
+        first_name: document.getElementById("first_name").value.trim(),
+        last_name: document.getElementById("last_name").value.trim(),
+        company_name: document.getElementById("company_name").value.trim(),
+        country: document.getElementById("country").value.trim(),
+        city: document.getElementById("city").value.trim(),
+        postal_code: document.getElementById("postal_code").value.trim(),
+        phone_number: document.getElementById("phone_number").value.trim()
       };
-      const all = JSON.parse(localStorage.getItem("customers") || "[]");
-      all.push(c);
-      localStorage.setItem("customers", JSON.stringify(all));
+
+      if (!newCust.customer_id || !newCust.first_name || !newCust.last_name) {
+        alert("Please fill in required fields.");
+        return;
+      }
+
+      const customers = JSON.parse(localStorage.getItem("customers") || "[]");
+      customers.push(newCust);
+      localStorage.setItem("customers", JSON.stringify(customers));
+
+      document.getElementById("customer_form").reset();
       loadCustomers();
     }
 
-    function delCustomer(i) {
-      const all = JSON.parse(localStorage.getItem("customers") || "[]");
-      all.splice(i, 1);
-      localStorage.setItem("customers", JSON.stringify(all));
+    function deleteCustomer(index) {
+      const customers = JSON.parse(localStorage.getItem("customers") || "[]");
+      customers.splice(index, 1);
+      localStorage.setItem("customers", JSON.stringify(customers));
       loadCustomers();
     }
 
-    function search() {
-      const q = search_input.value.toLowerCase();
-      document.querySelectorAll("#customer_table tr:not(:first-child)").forEach(row => {
-        row.style.display = [...row.cells].some(td => td.textContent.toLowerCase().includes(q)) ? "" : "none";
-      });
+    function searchCustomer() {
+      const query = document.getElementById("search_input").value.toLowerCase();
+      const table = document.getElementById("customer_table");
+      const rows = table.getElementsByTagName("tr");
+
+      for (let i = 1; i < rows.length; i++) {
+        const cells = rows[i].getElementsByTagName("td");
+        let found = false;
+        for (let j = 0; j < cells.length - 1; j++) { // exclude actions
+          if (cells[j].textContent.toLowerCase().includes(query)) {
+            found = true;
+            break;
+          }
+        }
+        rows[i].style.display = found ? "" : "none";
+      }
     }
 
     window.onload = loadCustomers;
@@ -57,18 +94,25 @@
   </nav>
 
   <h1>Customers</h1>
-  <form onsubmit="event.preventDefault(); addCustomer();">
-    <label>ID: <input type="text" id="id" required></label><br>
-    <label>First: <input type="text" id="first" required></label><br>
-    <label>Last: <input type="text" id="last" required></label><br>
-    <label>Company: <input type="text" id="company" required></label><br>
-    <label>Country: <input type="text" id="country" required></label><br>
-    <label>State: <input type="text" id="city" required></label><br>
-    <label>Postal: <input type="text" id="postal" required></label><br>
-    <label>Phone: <input type="text" id="phone" required></label><br>
-    <button type="submit">Submit</button><br><br>
-    <label>Search: <input type="text" id="search_input" oninput="search()" placeholder="Search..."></label>
+
+  <form id="customer_form" onsubmit="event.preventDefault(); addCustomer();">
+    <label>Customer ID: <input type="text" id="customer_id" required></label><br>
+    <label>First Name: <input type="text" id="first_name" required></label><br>
+    <label>Last Name: <input type="text" id="last_name" required></label><br>
+    <label>Company Name: <input type="text" id="company_name"></label><br>
+    <label>Country: <input type="text" id="country"></label><br>
+    <label>City: <input type="text" id="city"></label><br>
+    <label>Postal Code: <input type="text" id="postal_code"></label><br>
+    <label>Phone Number: <input type="text" id="phone_number"></label><br>
+    <button type="submit">Submit</button>
   </form>
+
+  <div style="margin-top: 10px;">
+    <input type="text" id="search_input" placeholder="Search Customers..." />
+    <button type="button" onclick="searchCustomer()">Search</button>
+  </div>
+
+  <h2>Saved Customers</h2>
   <table id="customer_table"></table>
 </body>
 </html>
