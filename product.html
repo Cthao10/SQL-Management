@@ -6,75 +6,67 @@
   <style>
     table { border-collapse: collapse; width: 100%; }
     th, td { border: 1px solid #999; padding: 8px; }
+    nav a { margin-right: 10px; }
   </style>
   <script>
-    function loadProducts() {
+    function load() {
       const table = document.getElementById("product_table");
       const data = JSON.parse(localStorage.getItem("products") || "[]");
-      table.innerHTML = `<tr><th>ID</th><th>Price</th><th>Weight</th><th>Unit</th><th>Location</th><th>Quantity</th><th>Actions</th></tr>`;
+      table.innerHTML = `<tr><th>ID</th><th>Name</th><th>Price</th><th>Tax</th><th>Action</th></tr>`;
       data.forEach((p, i) => {
-        const row = table.insertRow();
-        row.innerHTML = `<td>${p.id}</td><td>${p.price}</td><td>${p.weight}</td><td>${p.unit}</td><td>${p.location}</td><td>${p.quantity}</td>
-        <td><button onclick="deleteProduct(${i})">Delete</button></td>`;
+        table.innerHTML += `<tr><td>${p.id}</td><td>${p.name}</td><td>${p.price}</td><td>${p.tax}</td>
+          <td><button onclick="del(${i})">Delete</button></td></tr>`;
       });
     }
 
-    function addProduct() {
+    function add() {
       const p = {
-        id: document.getElementById("id").value,
-        price: document.getElementById("price").value,
-        weight: document.getElementById("weight").value,
-        unit: document.getElementById("unit").value,
-        location: document.getElementById("location").value,
-        quantity: document.getElementById("quantity").value
+        id: id.value,
+        name: name.value,
+        price: price.value,
+        tax: tax.value
       };
-      const products = JSON.parse(localStorage.getItem("products") || "[]");
-      products.push(p);
-      localStorage.setItem("products", JSON.stringify(products));
-      loadProducts();
+      const all = JSON.parse(localStorage.getItem("products") || "[]");
+      all.push(p);
+      localStorage.setItem("products", JSON.stringify(all));
+      load();
     }
 
-    function deleteProduct(index) {
-      const products = JSON.parse(localStorage.getItem("products") || "[]");
-      products.splice(index, 1);
-      localStorage.setItem("products", JSON.stringify(products));
-      loadProducts();
+    function del(i) {
+      const all = JSON.parse(localStorage.getItem("products") || "[]");
+      all.splice(i, 1);
+      localStorage.setItem("products", JSON.stringify(all));
+      load();
     }
 
-    function searchProduct() {
-      const q = document.getElementById("search_query").value.toLowerCase();
-      const rows = document.querySelectorAll("#product_table tr:not(:first-child)");
-      rows.forEach(row => {
-        const match = [...row.cells].some(td => td.textContent.toLowerCase().includes(q));
-        row.style.display = match ? "" : "none";
+    function search() {
+      const q = search_input.value.toLowerCase();
+      document.querySelectorAll("#product_table tr:not(:first-child)").forEach(row => {
+        row.style.display = [...row.cells].some(td => td.textContent.toLowerCase().includes(q)) ? "" : "none";
       });
     }
 
-    window.onload = loadProducts;
+    window.onload = load;
   </script>
 </head>
 <body>
   <nav>
-    <a href="dashboard.html">Dashboard</a> |
-    <a href="customers.html">Customers</a> |
-    <a href="employee.html">Employee</a> |
-    <a href="product.html">Product</a> |
+    <a href="dashboard.html">Dashboard</a>
+    <a href="customers.html">Customers</a>
+    <a href="employee.html">Employee</a>
+    <a href="product.html">Product</a>
     <a href="orders.html">Orders</a>
   </nav>
 
   <h1>Product</h1>
-  <form onsubmit="event.preventDefault(); addProduct();">
+  <form onsubmit="event.preventDefault(); add();">
     <label>ID: <input type="text" id="id" required></label><br>
-    <label>Price: <input type="text" id="price" required></label><br>
-    <label>Weight: <input type="text" id="weight" required></label><br>
-    <label>Unit (kg/lb): <input type="text" id="unit" required></label><br>
-    <label>Location: <input type="text" id="location" required></label><br>
-    <label>Quantity: <input type="number" id="quantity" required></label><br>
+    <label>Name: <input type="text" id="name" required></label><br>
+    <label>Price: <input type="number" id="price" required></label><br>
+    <label>Tax: <input type="number" id="tax" required></label><br>
     <button type="submit">Submit</button><br><br>
-    <label>Search All Records: <input type="text" id="search_query" oninput="searchProduct()" placeholder="Search..."></label>
+    <label>Search: <input type="text" id="search_input" oninput="search()" placeholder="Search..."></label>
   </form>
-
-  <h2>Saved Products</h2>
   <table id="product_table"></table>
 </body>
 </html>
