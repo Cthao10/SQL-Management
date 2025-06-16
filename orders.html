@@ -1,71 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Manage Orders</title>
-    <script>
-        function loadData() {
-            const table = document.getElementById("order_table");
-            const data = JSON.parse(localStorage.getItem("orders") || "[]");
-            data.forEach((entry, index) => {
-                const row = table.insertRow();
-                row.innerHTML = `<td>${entry.order_id}</td><td>${entry.customer_id}</td><td>${entry.employee_id}</td><td>${entry.product_id}</td><td>${entry.quantity}</td><td>${entry.storage_location}</td><td>${entry.destination}</td><td><button onclick="deleteRow(this, ${index})">Delete</button></td>`;
-            });
-        }
+  <meta charset="UTF-8">
+  <title>Orders</title>
+  <style>
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #999; padding: 8px; }
+    .btn { margin: 2px; }
+  </style>
+  <script>
+    function loadEmployees() {
+      const table = document.getElementById("employee_table");
+      const data = JSON.parse(localStorage.getItem("employees") || "[]");
+      table.innerHTML = `<tr><th>Employee ID</th><th>First Name</th><th>Last Name</th><th>Phone</th><th>Actions</th></tr>`;
+      data.forEach((emp, index) => {
+        const row = table.insertRow();
+        row.innerHTML = `<td>${emp.employee_id}</td><td>${emp.first_name}</td><td>${emp.last_name}</td><td>${emp.phone}</td>
+          <td><button onclick="deleteEmployee(${index})">Delete</button></td>`;
+      });
+    }
 
-        function addEntry() {
-            const newEntry = {
-                order_id: document.getElementById("order_id").value,
-                customer_id: document.getElementById("customer_id").value,
-                employee_id: document.getElementById("employee_id").value,
-                product_id: document.getElementById("product_id").value,
-                quantity: document.getElementById("quantity").value,
-                storage_location: document.getElementById("storage_location").value,
-                destination: document.getElementById("destination").value
-            };
-            const data = JSON.parse(localStorage.getItem("orders") || "[]");
-            data.push(newEntry);
-            localStorage.setItem("orders", JSON.stringify(data));
-            location.reload();
-        }
+    function addEmployee() {
+      const newEmp = {
+        employee_id: document.getElementById("employee_id").value,
+        first_name: document.getElementById("first_name").value,
+        last_name: document.getElementById("last_name").value,
+        phone: document.getElementById("phone").value
+      };
+      const employees = JSON.parse(localStorage.getItem("employees") || "[]");
+      employees.push(newEmp);
+      localStorage.setItem("employees", JSON.stringify(employees));
+      loadEmployees();
+    }
 
-        function deleteRow(btn, index) {
-            const row = btn.parentNode.parentNode;
-            row.parentNode.removeChild(row);
-            const data = JSON.parse(localStorage.getItem("orders") || "[]");
-            data.splice(index, 1);
-            localStorage.setItem("orders", JSON.stringify(data));
-            location.reload();
-        }
+    function deleteEmployee(index) {
+      const employees = JSON.parse(localStorage.getItem("employees") || "[]");
+      employees.splice(index, 1);
+      localStorage.setItem("employees", JSON.stringify(employees));
+      loadEmployees();
+    }
 
-        window.onload = loadData;
-    </script>
+    function searchEmployee() {
+      const query = document.getElementById("search_query").value.toLowerCase();
+      const rows = document.querySelectorAll("#employee_table tr:not(:first-child)");
+      rows.forEach(row => {
+        const match = [...row.cells].some(td => td.textContent.toLowerCase().includes(query));
+        row.style.display = match ? "" : "none";
+      });
+    }
+
+    window.onload = loadEmployees;
+  </script>
 </head>
 <body>
-    <nav style="margin-bottom: 20px;">
-        <a href="dashboard.html">Dashboard</a> |
-        <a href="customers.html">Customers</a> |
-        <a href="employee.html">Employee</a> |
-        <a href="product.html">Product</a> |
-        <a href="orders.html">Orders</a>
-    </nav>
-    <hr>
+  <nav>
+    <a href="dashboard.html">Dashboard</a> |
+    <a href="customers.html">Customers</a> |
+    <a href="employee.html">Employee</a> |
+    <a href="product.html">Product</a> |
+    <a href="orders.html">Orders</a>
+    <input type="text" id="search_query" placeholder="Search..." oninput="searchEmployee()">
+  </nav>
 
-    <h1>Manage Orders</h1>
-    <form onsubmit="event.preventDefault(); addEntry();">
-        <label>Order ID: <input type="text" id="order_id" required></label><br>
-        <label>Customer ID: <input type="text" id="customer_id" required></label><br>
-        <label>Employee ID: <input type="text" id="employee_id" required></label><br>
-        <label>Product ID: <input type="text" id="product_id" required></label><br>
-        <label>Quantity (kg): <input type="text" id="quantity" required></label><br>
-        <label>Storage Location: <input type="text" id="storage_location" required></label><br>
-        <label>Destination (City): <input type="text" id="destination" required></label><br>
-        <button type="submit">Submit</button>
-    </form>
+  <h1>Orders</h1>
+  <form onsubmit="event.preventDefault(); addEmployee();">
+    <label>Employee ID: <input type="text" id="employee_id" required></label><br>
+    <label>First Name: <input type="text" id="first_name" required></label><br>
+    <label>Last Name: <input type="text" id="last_name" required></label><br>
+    <label>Phone: <input type="text" id="phone" required></label><br>
+    <button type="submit">Submit</button>
+  </form>
 
-    <h2>Saved Entries</h2>
-    <table border="1" id="order_table">
-        <tr><th>Order ID</th><th>Customer ID</th><th>Employee ID</th><th>Product ID</th><th>Quantity</th><th>Storage Location</th><th>Destination</th><th>Action</th></tr>
-    </table>
+  <h2>Saved Employees</h2>
+  <table id="employee_table"></table>
 </body>
 </html>
