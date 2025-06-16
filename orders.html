@@ -1,116 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Orders</title>
   <style>
     table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #999; padding: 8px; }
+    th, td { border: 1px solid #999; padding: 6px; text-align: left; }
+    button { margin: 2px; }
     nav a { margin-right: 10px; }
   </style>
   <script>
-    function load() {
-      const table = document.getElementById("orders_table");
+    function loadOrders() {
+      const table = document.getElementById("order_table");
       const data = JSON.parse(localStorage.getItem("orders") || "[]");
-      table.innerHTML = `<tr><th>Order ID</th><th>Customer</th><th>Item</th><th>Qty</th><th>Status</th><th>Date</th><th>Invoice</th><th>Action</th></tr>`;
-      data.forEach((o, i) => {
-        table.innerHTML += `<tr>
-          <td>${o.order_id}</td>
-          <td>${o.customer}</td>
-          <td>${o.item}</td>
-          <td>${o.qty}</td>
-          <td>${o.status}</td>
-          <td>${o.date}</td>
-          <td>Payment: ${o.payment}<br>Price: $${o.price}<br>Tax: $${o.tax}<br>Ship: $${o.ship}</td>
+      table.innerHTML = `<tr>
+        <th>Order ID</th>
+        <th>Customer ID</th>
+        <th>Employee ID</th>
+        <th>Product ID</th>
+        <th>Quantity (kg)</th>
+        <th>Order Date</th>
+        <th>Item Status</th>
+        <th>Storage Location</th>
+        <th>Shipping Location</th>
+        <th>Actions</th>
+      </tr>`;
+      data.forEach((ord, index) => {
+        const row = table.insertRow();
+        row.innerHTML = `
+          <td>${ord.order_id}</td>
+          <td>${ord.customer_id}</td>
+          <td>${ord.employee_id}</td>
+          <td>${ord.product_id}</td>
+          <td>${ord.quantity} kg</td>
+          <td>${ord.order_date}</td>
+          <td>${ord.item_status}</td>
+          <td>${ord.storage_location}</td>
+          <td>${ord.shipping_location}</td>
           <td>
-            <button onclick="viewDetail(${i})">View</button>
-            <button onclick="del(${i})">Delete</button>
-          </td>
-        </tr>`;
+            <button onclick="viewDetails(${index})">View Detail</button>
+            <button onclick="reorder(${index})">Re-order</button>
+            <button onclick="modifyQuantity(${index})">Modify Qty</button>
+            <button onclick="deleteOrder(${index})">Delete</button>
+          </td>`;
       });
     }
 
-    function add() {
-      const o = {
-        order_id: order_id.value,
-        customer: customer.value,
-        item: item.value,
-        qty: qty.value,
-        status: status.value,
-        date: date.value,
-        payment: payment.value,
-        price: price.value,
-        tax: tax.value,
-        ship: ship.value
+    function addOrder() {
+      const newOrd = {
+        order_id: document.getElementById("order_id").value.trim(),
+        customer_id: document.getElementById("customer_id").value.trim(),
+        employee_id: document.getElementById("employee_id").value.trim(),
+        product_id: document.getElementById("product_id").value.trim(),
+        quantity: document.getElementById("quantity").value.trim(),
+        order_date: document.getElementById("order_date").value,
+        item_status: document.getElementById("item_status").value,
+        storage_location: document.getElementById("storage_location").value.trim(),
+        shipping_location: document.getElementById("shipping_location").value.trim(),
+        payment_method: document.getElementById("payment_method").value.trim(),
+        price: document.getElementById("price").value.trim(),
+        ship_rate: document.getElementById("ship_rate").value.trim()
       };
-      const all = JSON.parse(localStorage.getItem("orders") || "[]");
-      all.push(o);
-      localStorage.setItem("orders", JSON.stringify(all));
-      load();
+
+      if (!newOrd.order_id || !newOrd.customer_id || !newOrd.product_id || !newOrd.quantity) {
+        alert("Please fill in required fields.");
+        return;
+      }
+
+      const orders = JSON.parse(localStorage.getItem("orders") || "[]");
+      orders.push(newOrd);
+      localStorage.setItem("orders", JSON.stringify(orders));
+
+      document.getElementById("order_form").reset();
+      loadOrders();
     }
 
-    function del(i) {
-      const all = JSON.parse(localStorage.getItem("orders") || "[]");
-      all.splice(i, 1);
-      localStorage.setItem("orders", JSON.stringify(all));
-      load();
+    function deleteOrder(index) {
+      const orders = JSON.parse(localStorage.getItem("orders") || "[]");
+      orders.splice(index, 1);
+      localStorage.setItem("orders", JSON.stringify(orders));
+      loadOrders();
     }
 
-    function viewDetail(i) {
-      const o = JSON.parse(localStorage.getItem("orders"))[i];
-      alert(`Order ID: ${o.order_id}
-Customer: ${o.customer}
-Item: ${o.item}
-Qty: ${o.qty}
-Status: ${o.status}
-Date: ${o.date}
-Payment: ${o.payment}
-Price: $${o.price}
-Tax: $${o.tax}
-Shipping: $${o.ship}`);
-    }
-
-    function search() {
-      const q = search_input.value.toLowerCase();
-      document.querySelectorAll("#orders_table tr:not(:first-child)").forEach(row => {
-        row.style.display = [...row.cells].some(td => td.textContent.toLowerCase().includes(q)) ? "" : "none";
-      });
-    }
-
-    window.onload = load;
-  </script>
-</head>
-<body>
-  <nav>
-    <a href="dashboard.html">Dashboard</a>
-    <a href="customers.html">Customers</a>
-    <a href="employee.html">Employee</a>
-    <a href="product.html">Product</a>
-    <a href="orders.html">Orders</a>
-  </nav>
-
-  <h1>Orders</h1>
-  <form onsubmit="event.preventDefault(); add();">
-    <label>Order ID: <input type="text" id="order_id" required></label><br>
-    <label>Customer: <input type="text" id="customer" required></label><br>
-    <label>Item: <input type="text" id="item" required></label><br>
-    <label>Qty: <input type="number" id="qty" required></label><br>
-    <label>Status: 
-      <select id="status">
-        <option>Pending</option>
-        <option>Shipped</option>
-        <option>Delivered</option>
-        <option>Cancelled</option>
-      </select>
-    </label><br>
-    <label>Date: <input type="date" id="date" required></label><br>
-    <label>Payment Method: <input type="text" id="payment" required></label><br>
-    <label>Price: <input type="number" id="price" required></label><br>
-    <label>Tax: <input type="number" id="tax" required></label><br>
-    <label>Shipping: <input type="number" id="ship" required></label><br>
-    <button type="submit">Submit</button><br><br>
-    <label>Search: <input type="text" id="search_input" oninput="search()" placeholder="Search..."></label>
-  </form>
-  <table id="orders_table"></table>
-</body>
-</html>
+    function viewDetails(index) {
+      const orders = JSON.parse(local
