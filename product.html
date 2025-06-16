@@ -1,52 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Product</title>
   <style>
     table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #999; padding: 8px; }
+    th, td { border: 1px solid #999; padding: 6px; text-align: left; }
+    button { margin: 2px; }
     nav a { margin-right: 10px; }
   </style>
   <script>
-    function load() {
+    function loadProducts() {
       const table = document.getElementById("product_table");
       const data = JSON.parse(localStorage.getItem("products") || "[]");
-      table.innerHTML = `<tr><th>ID</th><th>Name</th><th>Price</th><th>Tax</th><th>Action</th></tr>`;
-      data.forEach((p, i) => {
-        table.innerHTML += `<tr><td>${p.id}</td><td>${p.name}</td><td>${p.price}</td><td>${p.tax}</td>
-          <td><button onclick="del(${i})">Delete</button></td></tr>`;
+      table.innerHTML = `<tr>
+        <th>Product ID</th><th>Price</th><th>Weight</th><th>Unit</th><th>Storage Location</th><th>Quantity</th><th>Actions</th>
+      </tr>`;
+      data.forEach((prod, index) => {
+        const row = table.insertRow();
+        row.innerHTML = `
+          <td>${prod.product_id}</td>
+          <td>${prod.product_price}</td>
+          <td>${prod.product_weight}</td>
+          <td>${prod.weight_unit}</td>
+          <td>${prod.storage_location}</td>
+          <td>${prod.product_quantity}</td>
+          <td><button onclick="deleteProduct(${index})">Delete</button></td>`;
       });
     }
 
-    function add() {
-      const p = {
-        id: id.value,
-        name: name.value,
-        price: price.value,
-        tax: tax.value
+    function addProduct() {
+      const newProd = {
+        product_id: document.getElementById("product_id").value.trim(),
+        product_price: document.getElementById("product_price").value.trim(),
+        product_weight: document.getElementById("product_weight").value.trim(),
+        weight_unit: document.getElementById("weight_unit").value,
+        storage_location: document.getElementById("storage_location").value.trim(),
+        product_quantity: document.getElementById("product_quantity").value.trim()
       };
-      const all = JSON.parse(localStorage.getItem("products") || "[]");
-      all.push(p);
-      localStorage.setItem("products", JSON.stringify(all));
-      load();
+
+      if (!newProd.product_id || !newProd.product_price) {
+        alert("Please fill in required fields.");
+        return;
+      }
+
+      const products = JSON.parse(localStorage.getItem("products") || "[]");
+      products.push(newProd);
+      localStorage.setItem("products", JSON.stringify(products));
+
+      document.getElementById("product_form").reset();
+      loadProducts();
     }
 
-    function del(i) {
-      const all = JSON.parse(localStorage.getItem("products") || "[]");
-      all.splice(i, 1);
-      localStorage.setItem("products", JSON.stringify(all));
-      load();
+    function deleteProduct(index) {
+      const products = JSON.parse(localStorage.getItem("products") || "[]");
+      products.splice(index, 1);
+      localStorage.setItem("products", JSON.stringify(products));
+      loadProducts();
     }
 
-    function search() {
-      const q = search_input.value.toLowerCase();
-      document.querySelectorAll("#product_table tr:not(:first-child)").forEach(row => {
-        row.style.display = [...row.cells].some(td => td.textContent.toLowerCase().includes(q)) ? "" : "none";
-      });
+    function searchProduct() {
+      const query = document.getElementById("search_input").value.toLowerCase();
+      const table = document.getElementById("product_table");
+      const rows = table.getElementsByTagName("tr");
+
+      for (let i = 1; i < rows.length; i++) {
+        const cells = rows[i].getElementsByTagName("td");
+        let found = false;
+        for (let j = 0; j < cells.length - 1; j++) {
+          if (cells[j].textContent.toLowerCase().includes(query)) {
+            found = true;
+            break;
+          }
+        }
+        rows[i].style.display = found ? "" : "none";
+      }
     }
 
-    window.onload = load;
+    window.onload = loadProducts;
   </script>
 </head>
 <body>
@@ -59,14 +90,28 @@
   </nav>
 
   <h1>Product</h1>
-  <form onsubmit="event.preventDefault(); add();">
-    <label>ID: <input type="text" id="id" required></label><br>
-    <label>Name: <input type="text" id="name" required></label><br>
-    <label>Location: <input type="number" id="location" required></label><br>
-    <label>Price: <input type="number" id="price" required></label><br>
-    <button type="submit">Submit</button><br><br>
-    <label>Search: <input type="text" id="search_input" oninput="search()" placeholder="Search..."></label>
+
+  <form id="product_form" onsubmit="event.preventDefault(); addProduct();">
+    <label>Product ID: <input type="text" id="product_id" required></label><br>
+    <label>Price: <input type="number" step="0.01" id="product_price" required></label><br>
+    <label>Weight: <input type="number" step="0.01" id="product_weight"></label><br>
+    <label>Weight Unit:
+      <select id="weight_unit">
+        <option value="kg">kg</option>
+        <option value="lb">lb</option>
+      </select>
+    </label><br>
+    <label>Storage Location: <input type="text" id="storage_location"></label><br>
+    <label>Quantity: <input type="number" id="product_quantity"></label><br>
+    <button type="submit">Submit</button>
   </form>
+
+  <div style="margin-top: 10px;">
+    <input type="text" id="search_input" placeholder="Search Products..." />
+    <button type="button" onclick="searchProduct()">Search</button>
+  </div>
+
+  <h2>Saved Products</h2>
   <table id="product_table"></table>
 </body>
 </html>
