@@ -44,7 +44,8 @@
 <form id="employeeForm">
   <div><label>First Name: <input type="text" id="firstName" required></label></div>
   <div><label>Last Name: <input type="text" id="lastName" required></label></div>
-  <div><label>Employee ID: <input type="text" id="employeeId" required></label></div>
+  <div><label>Employee ID: <input type="text" id="employeeId"></label></div>
+  <div><label>Position: <input type="text" id="position"></label></div>
   <div><label>Department: <input type="text" id="department"></label></div>
   <div><label>Email: <input type="email" id="email"></label></div>
   <div><label>Phone: <input type="text" id="phone"></label></div>
@@ -58,12 +59,15 @@
 <div id="entries" class="entry"></div>
 
 <script>
-  const inputs = ['firstName', 'lastName', 'employeeId', 'department', 'email', 'phone'];
+  const inputs = [
+    'firstName', 'lastName', 'employeeId',
+    'position', 'department', 'email', 'phone'
+  ];
+
+  // Load saved values
   inputs.forEach(id => {
     const el = document.getElementById(id);
-    if (!el) return;
-    const saved = localStorage.getItem('employee_' + id);
-    if (saved) el.value = saved;
+    el.value = localStorage.getItem('employee_' + id) || '';
     el.addEventListener('input', () => {
       localStorage.setItem('employee_' + id, el.value);
     });
@@ -71,7 +75,8 @@
 
   const form = document.getElementById('employeeForm');
   const entriesDiv = document.getElementById('entries');
-  let employees = JSON.parse(localStorage.getItem('employees')) || [];
+  const searchInput = document.getElementById('searchInput');
+  let employees = JSON.parse(localStorage.getItem('employees') || '[]');
 
   function saveEmployees() {
     localStorage.setItem('employees', JSON.stringify(employees));
@@ -80,17 +85,15 @@
   function clearInputs() {
     inputs.forEach(id => {
       const el = document.getElementById(id);
-      if (el) {
-        el.value = '';
-        localStorage.removeItem('employee_' + id);
-      }
+      el.value = '';
+      localStorage.removeItem('employee_' + id);
     });
   }
 
   function renderList(filter = '') {
-    const filtered = employees.filter(e => {
-      return Object.values(e).join(' ').toLowerCase().includes(filter.toLowerCase());
-    });
+    const filtered = employees.filter(e =>
+      Object.values(e).join(' ').toLowerCase().includes(filter.toLowerCase())
+    );
 
     if (filtered.length === 0) {
       entriesDiv.innerHTML = '<p>No employees found.</p>';
@@ -98,4 +101,64 @@
     }
 
     let html = '<table><thead><tr>';
-    inputs.forEach
+    inputs.forEach(id => {
+      const label = id.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
+      html += `<th>${label}</th>`;
+    });
+    html += '<th>Actions</th></tr></thead><tbody>';
+
+    filtered.forEach((emp, i) => {
+      html += '<tr>';
+      inputs.forEach(id => {
+        html += `<td>${emp[id] || ''}</td>`;
+      });
+      html += `<td><button class="deleteBtn" data-index="${i}">Delete</button></td></tr>`;
+    });
+
+    html += '</tbody></table>';
+    entriesDiv.innerHTML = html;
+
+    document.querySelectorAll('.deleteBtn').forEach(btn => {
+      btn.onclick = () => {
+        employees.splice(btn.dataset.index, 1);
+        saveEmployees();
+        renderList(searchInput.value);
+      };
+    });
+  }
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const newEmployee = {};
+    let valid = true;
+
+    inputs.forEach(id => {
+      const val = document.getElementById(id).value.trim();
+      if ((id === 'firstName' || id === 'lastName') && val === '') valid = false;
+      newEmployee[id] = val;
+    });
+
+    if (!valid) {
+      alert('First and Last Name are required.');
+      return;
+    }
+
+    employees.push(newEmployee);
+    saveEmployees();
+    renderList();
+    clearInputs();
+  });
+
+  searchInput.addEventListener('input', () => {
+    renderList(searchInput.value);
+  });
+
+  searchInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') e.preventDefault();
+  });
+
+  renderList();
+</script>
+
+</body>
+</html>
