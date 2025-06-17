@@ -4,28 +4,15 @@
   <meta charset="UTF-8" />
   <title>Employees</title>
   <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
     form > div { margin-bottom: 8px; }
-    table, th, td { border: 1px solid #ddd; border-collapse: collapse; padding: 5px; }
-    th { background-color: #f0f0f0; }
-    .entry { margin-top: 10px; }
+    table, th, td { border: 1px solid #ddd; border-collapse: collapse; padding: 5px;}
+    th { background: #f0f0f0; }
+    nav ul { list-style: none; display: flex; gap: 10px; padding: 0;}
+    nav a { text-decoration: none; color: #333;}
+    #logoutBtn { float: right; }
+    .entry { margin-top: 10px;}
     button { cursor: pointer; }
-    nav ul {
-      list-style: none;
-      display: flex;
-      gap: 10px;
-      padding: 0;
-      margin: 0 0 10px 0;
-      background: #333;
-    }
-    nav a {
-      color: white;
-      text-decoration: none;
-      padding: 8px 12px;
-      display: block;
-    }
-    nav a:hover {
-      background: #555;
-    }
   </style>
 </head>
 <body>
@@ -37,7 +24,9 @@
     <li><a href="employee.html">Employees</a></li>
     <li><a href="orders.html">Orders</a></li>
   </ul>
+  <button id="logoutBtn" onclick="logout()">Logout</button>
 </nav>
+<hr>
 
 <h1>Employees</h1>
 
@@ -45,117 +34,86 @@
   <div><label>First Name: <input type="text" id="firstName" required></label></div>
   <div><label>Last Name: <input type="text" id="lastName" required></label></div>
   <div><label>Employee ID: <input type="text" id="employeeId"></label></div>
-  <div><label>Position: <input type="text" id="position"></label></div>
   <div><label>Department: <input type="text" id="department"></label></div>
   <div><label>Email: <input type="email" id="email"></label></div>
   <div><label>Phone: <input type="text" id="phone"></label></div>
   <button type="submit">Add Employee</button>
 </form>
 
-<div style="margin-top: 10px;">
-  <input type="text" id="searchInput" placeholder="Search employees..." style="width: 300px; padding:5px;">
+<div style="margin-top:10px">
+  <input type="text" id="searchInput" placeholder="Search employees..." style="width:300px;padding:5px;" onkeydown="return event.key !== 'Enter';">
 </div>
 
 <div id="entries" class="entry"></div>
 
 <script>
-  const inputs = [
-    'firstName', 'lastName', 'employeeId',
-    'position', 'department', 'email', 'phone'
-  ];
+  const currentUser = localStorage.getItem('currentUser');
+  if (!currentUser) window.location.href='login.html';
 
-  // Load saved values
-  inputs.forEach(id => {
-    const el = document.getElementById(id);
-    el.value = localStorage.getItem('employee_' + id) || '';
-    el.addEventListener('input', () => {
-      localStorage.setItem('employee_' + id, el.value);
-    });
+  const inputs = ['firstName','lastName','employeeId','department','email','phone'];
+  inputs.forEach(id=>{
+    const el=document.getElementById(id);
+    el.value = localStorage.getItem(currentUser+'_employee_'+id) || '';
+    el.addEventListener('input',()=>localStorage.setItem(currentUser+'_employee_'+id,el.value));
   });
 
-  const form = document.getElementById('employeeForm');
-  const entriesDiv = document.getElementById('entries');
-  const searchInput = document.getElementById('searchInput');
-  let employees = JSON.parse(localStorage.getItem('employees') || '[]');
+  const form=document.getElementById('employeeForm');
+  const entriesDiv=document.getElementById('entries');
+  const searchInput=document.getElementById('searchInput');
+  let employees = JSON.parse(localStorage.getItem(currentUser+'_employees')||'[]');
 
-  function saveEmployees() {
-    localStorage.setItem('employees', JSON.stringify(employees));
+  function saveEmployees(){
+    localStorage.setItem(currentUser+'_employees', JSON.stringify(employees));
   }
 
-  function clearInputs() {
-    inputs.forEach(id => {
-      const el = document.getElementById(id);
-      el.value = '';
-      localStorage.removeItem('employee_' + id);
-    });
-  }
-
-  function renderList(filter = '') {
-    const filtered = employees.filter(e =>
-      Object.values(e).join(' ').toLowerCase().includes(filter.toLowerCase())
-    );
-
-    if (filtered.length === 0) {
-      entriesDiv.innerHTML = '<p>No employees found.</p>';
-      return;
-    }
-
-    let html = '<table><thead><tr>';
-    inputs.forEach(id => {
-      const label = id.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
-      html += `<th>${label}</th>`;
-    });
-    html += '<th>Actions</th></tr></thead><tbody>';
-
-    filtered.forEach((emp, i) => {
-      html += '<tr>';
-      inputs.forEach(id => {
-        html += `<td>${emp[id] || ''}</td>`;
-      });
-      html += `<td><button class="deleteBtn" data-index="${i}">Delete</button></td></tr>`;
-    });
-
-    html += '</tbody></table>';
-    entriesDiv.innerHTML = html;
-
-    document.querySelectorAll('.deleteBtn').forEach(btn => {
-      btn.onclick = () => {
-        employees.splice(btn.dataset.index, 1);
-        saveEmployees();
-        renderList(searchInput.value);
-      };
+  function clearInputs(){
+    inputs.forEach(id=>{
+      const el=document.getElementById(id);
+      el.value='';
+      localStorage.removeItem(currentUser+'_employee_'+id);
     });
   }
 
-  form.addEventListener('submit', e => {
+  function renderList(filter=''){
+    const filtered=employees.filter(e=>Object.values(e).join(' ').toLowerCase().includes(filter.toLowerCase()));
+    if(!filtered.length){entriesDiv.innerHTML='<p>No employees found.</p>'; return;}
+    let html='<table><thead><tr>';
+    inputs.forEach(id=>html+=`<th>${id.replace(/([A-Z])/g,' $1')}</th>`);
+    html+='<th>Actions</th></tr></thead><tbody>';
+    filtered.forEach((emp,i)=>{
+      html+='<tr>';
+      inputs.forEach(id=>html+=`<td>${emp[id]||''}</td>`);
+      html+=`<td><button data-index="${i}" class="deleteBtn">Delete</button></td></tr>`;
+    });
+    html+='</tbody></table>';
+    entriesDiv.innerHTML=html;
+    document.querySelectorAll('.deleteBtn').forEach(btn=>{
+      btn.onclick=()=>{employees.splice(btn.dataset.index,1);saveEmployees();renderList(searchInput.value);};
+    });
+  }
+
+  form.addEventListener('submit',e=>{
     e.preventDefault();
-    const newEmployee = {};
-    let valid = true;
-
-    inputs.forEach(id => {
-      const val = document.getElementById(id).value.trim();
-      if ((id === 'firstName' || id === 'lastName') && val === '') valid = false;
-      newEmployee[id] = val;
+    const newEmp={};
+    let valid=true;
+    inputs.forEach(id=>{
+      const v=document.getElementById(id).value.trim();
+      if((id==='firstName'||id==='lastName')&&!v)valid=false;
+      newEmp[id]=v;
     });
-
-    if (!valid) {
-      alert('First and Last Name are required.');
-      return;
-    }
-
-    employees.push(newEmployee);
+    if(!valid){alert('First & Last Name are required');return;}
+    employees.push(newEmp);
     saveEmployees();
     renderList();
     clearInputs();
   });
 
-  searchInput.addEventListener('input', () => {
-    renderList(searchInput.value);
-  });
+  searchInput.addEventListener('input',e=>renderList(e.target.value));
 
-  searchInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') e.preventDefault();
-  });
+  function logout(){
+    localStorage.removeItem('currentUser');
+    window.location.href='login.html';
+  }
 
   renderList();
 </script>
