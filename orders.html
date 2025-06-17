@@ -1,235 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Orders</title>
-<style>
-  body { font-family: Arial, sans-serif; margin: 20px; }
-  nav { background: #333; padding: 10px; }
-  nav a { color: white; margin-right: 15px; text-decoration: none; }
-  nav a:hover { text-decoration: underline; }
-  form { margin-bottom: 20px; max-width: 400px; }
-  label { display: block; margin-top: 10px; }
-  input, select { padding: 5px; width: 100%; }
-  button { margin-top: 15px; padding: 8px 12px; }
-  #searchBar { margin-top: 10px; padding: 6px; width: 100%; max-width: 400px; }
-  .order-entry { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
-  .order-buttons button { margin-right: 10px; margin-top: 5px; }
-  .order-header { font-weight: bold; margin-bottom: 5px; }
-  .inline { display: inline-block; margin-right: 10px; }
-</style>
+  <meta charset="UTF-8" />
+  <title>Orders</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    form > div { margin-bottom: 8px; }
+    table { width:100%; border-collapse: collapse; margin-top:10px; }
+    th, td { border:1px solid #ddd; padding:8px; }
+    th { background:#f0f0f0; }
+    nav ul { list-style:none; display:flex; gap:10px; padding:0; }
+    nav a { text-decoration:none; color:#333; }
+    #logoutBtn { float: right; }
+    .order-entry { border:1px solid #ccc; padding:10px; margin-bottom:10px; }
+    .order-buttons button { margin-right:10px; margin-top:5px; }
+    .inline { display:inline-block; margin-right:10px; }
+  </style>
 </head>
 <body>
 
 <nav>
-  <a href="product.html">Products</a>
-  <a href="employee.html">Employees</a>
-  <a href="customers.html">Customers</a>
-  <a href="orders.html">Orders</a>
+  <ul>
+    <li><a href="customers.html">Customers</a></li>
+    <li><a href="product.html">Products</a></li>
+    <li><a href="employee.html">Employees</a></li>
+    <li><a href="orders.html">Orders</a></li>
+  </ul>
+  <button id="logoutBtn" onclick="logout()">Logout</button>
 </nav>
+<hr>
 
 <h1>Orders</h1>
 
-<form id="orderForm" onsubmit="event.preventDefault(); addOrder();">
-  <label for="orderId">Order ID:</label>
-  <input type="text" id="orderId" required />
-
-  <label for="orderDate">Order Date:</label>
-  <input type="date" id="orderDate" required />
-
-  <label for="itemStatus">Item Status:</label>
-  <select id="itemStatus" required>
-    <option value="">-- Select Status --</option>
-    <option value="pending">Pending</option>
-    <option value="shipped">Shipped</option>
-    <option value="delivered">Delivered</option>
-    <option value="cancelled">Cancelled</option>
-  </select>
-
-  <label for="itemId">Item ID:</label>
-  <input type="text" id="itemId" required />
-
-  <label for="productName">Product Name:</label>
-  <input type="text" id="productName" required />
-
-  <label for="quantity">Quantity (kg):</label>
-  <input type="number" id="quantity" min="1" required />
-
-  <label for="customerName">Customer Name:</label>
-  <input type="text" id="customerName" required />
-
-  <label for="storageLocation">Storage Location:</label>
-  <input type="text" id="storageLocation" required />
-
-  <label for="destination">Destination:</label>
-  <input type="text" id="destination" required />
-
-  <label for="paymentMethod">Payment Method:</label>
-  <input type="text" id="paymentMethod" required />
-
-  <label for="price">Price ($):</label>
-  <input type="number" id="price" min="0" step="0.01" required />
-
-  <label for="tax">Tax ($):</label>
-  <input type="number" id="tax" min="0" step="0.01" required />
-
-  <label for="shippingRate">Shipping Rate ($):</label>
-  <input type="number" id="shippingRate" min="0" step="0.01" required />
-
+<form id="orderForm">
+  <div><label>Order ID: <input type="text" id="orderId" required></label></div>
+  <div><label>Order Date: <input type="date" id="orderDate" required></label></div>
+  <div><label>Item Status: <select id="itemStatus" required>
+        <option value="">--</option>
+        <option value="pending">Pending</option>
+        <option value="shipped">Shipped</option>
+        <option value="delivered">Delivered</option>
+        <option value="cancelled">Cancelled</option>
+      </select></label></div>
+  <div><label>Item ID: <input type="text" id="itemId" required></label></div>
+  <div><label>Product Name: <input type="text" id="productName" required></label></div>
+  <div><label>Quantity (kg): <input type="number" id="quantity" required></label></div>
+  <div><label>Customer Name: <input type="text" id="customerName" required></label></div>
+  <div><label>Storage Location: <input type="text" id="storageLocation" required></label></div>
+  <div><label>Destination: <input type="text" id="destination" required></label></div>
+  <div><label>Price ($): <input type="number" id="price" step="0.01" required></label></div>
+  <div><label>Tax ($): <input type="number" id="tax" step="0.01" required></label></div>
   <button type="submit">Add Order</button>
-
-  <label for="searchBar">Search All Fields:</label>
-  <input type="text" id="searchBar" placeholder="Search orders..." />
 </form>
+
+<div style="margin-top:10px">
+  <input type="text" id="searchInput" placeholder="Search orders..." style="width:300px;padding:5px;" onkeydown="return event.key !== 'Enter';">
+</div>
 
 <div id="orderList"></div>
 
 <script>
-const form = document.getElementById('orderForm');
-const inputs = Array.from(form.elements).filter(el => ['INPUT', 'SELECT'].includes(el.tagName));
+  const currentUser = localStorage.getItem('currentUser');
+  if (!currentUser) window.location.href='login.html';
 
-inputs.forEach(input => {
-  const saved = localStorage.getItem('order_' + input.id);
-  if (saved) input.value = saved;
-  input.addEventListener('input', () => localStorage.setItem('order_' + input.id, input.value));
-});
-
-let orders = JSON.parse(localStorage.getItem('orders')) || [];
-
-function addOrder() {
-  const newOrder = {
-    orderId: form.orderId.value.trim(),
-    orderDate: form.orderDate.value,
-    itemStatus: form.itemStatus.value,
-    itemId: form.itemId.value.trim(),
-    productName: form.productName.value.trim(),
-    quantity: Number(form.quantity.value),
-    customerName: form.customerName.value.trim(),
-    storageLocation: form.storageLocation.value.trim(),
-    destination: form.destination.value.trim(),
-    paymentMethod: form.paymentMethod.value.trim(),
-    price: parseFloat(form.price.value).toFixed(2),
-    tax: parseFloat(form.tax.value).toFixed(2),
-    shippingRate: parseFloat(form.shippingRate.value).toFixed(2)
-  };
-
-  orders.push(newOrder);
-  saveOrders();
-  renderOrders(document.getElementById('searchBar').value);
-  clearForm();
-}
-
-function renderOrders(filter = '') {
-  const container = document.getElementById('orderList');
-  container.innerHTML = '';
-
-  const filtered = orders.filter(order =>
-    Object.values(order).some(val =>
-      String(val).toLowerCase().includes(filter.toLowerCase())
-    )
-  );
-
-  filtered.forEach((order, index) => {
-    const div = document.createElement('div');
-    div.className = 'order-entry';
-
-    div.innerHTML = `
-      <div class="order-header">Order #${order.orderId} - ${order.orderDate} - ${order.itemStatus}</div>
-      <div>
-        <span class="inline"><strong>Customer:</strong> ${order.customerName}</span>
-        <span class="inline"><strong>Item ID:</strong> ${order.itemId}</span>
-        <span class="inline"><strong>Quantity:</strong> ${order.quantity}</span>
-      </div>
-      <div><strong>Invoice:</strong> Payment: ${order.paymentMethod}, Price: $${order.price}, Tax: $${order.tax}, Shipping: $${order.shippingRate}</div>
-      <div class="order-buttons">
-        <button onclick="viewDetails(${index})">View Detail</button>
-        <button onclick="reOrder(${index})">Re-order</button>
-        <button onclick="modifyQuantity(${index})">Modify Quantity</button>
-        <button onclick="deleteOrder(${index})">Delete</button>
-      </div>
-      <div id="detail-${index}" style="display:none; margin-top:10px; font-size:0.9em; color:#555;"></div>
-    `;
-
-    container.appendChild(div);
+  const inputs = ['orderId','orderDate','itemStatus','itemId','productName','quantity','customerName','storageLocation','destination','price','tax'];
+  inputs.forEach(id=>{
+    const el=document.getElementById(id);
+    el.value = localStorage.getItem(currentUser+'_order_'+id) || '';
+    el.addEventListener('input',()=>localStorage.setItem(currentUser+'_order_'+id, el.value));
   });
-}
 
-function clearForm() {
-  form.reset();
-  inputs.forEach(input => localStorage.removeItem('order_' + input.id));
-}
+  const form=document.getElementById('orderForm');
+  const orderList=document.getElementById('orderList');
+  const searchInput=document.getElementById('searchInput');
+  let orders = JSON.parse(localStorage.getItem(currentUser+'_orders') || '[]');
 
-function deleteOrder(index) {
-  if (!confirm('Delete this order?')) return;
-  orders.splice(index, 1);
-  saveOrders();
-  renderOrders(document.getElementById('searchBar').value);
-}
-
-function saveOrders() {
-  localStorage.setItem('orders', JSON.stringify(orders));
-}
-
-function viewDetails(index) {
-  const detailDiv = document.getElementById(`detail-${index}`);
-  if (detailDiv.style.display === 'block') {
-    detailDiv.style.display = 'none';
-    detailDiv.innerHTML = '';
-    return;
+  function saveOrders(){
+    localStorage.setItem(currentUser+'_orders', JSON.stringify(orders));
   }
 
-  const order = orders[index];
-  detailDiv.style.display = 'block';
-  detailDiv.innerHTML = `
-    <div><strong>Receipt:</strong> Order on ${order.orderDate} for ${order.quantity} item(s) of ${order.productName} at $${order.price} each.</div>
-    <div><strong>Shipping Method:</strong> Standard Ground</div>
-    <div><strong>History:</strong> Status changed to ${order.itemStatus}.</div>
-    <div><strong>Storage Location:</strong> ${order.storageLocation}</div>
-    <div><strong>Destination:</strong> ${order.destination}</div>
-  `;
-}
+  function clearInputs(){
+    inputs.forEach(id=>{
+      const el=document.getElementById(id);
+      el.value='';
+      localStorage.removeItem(currentUser+'_order_'+id);
+    });
+  }
 
-function reOrder(index) {
-  const original = orders[index];
-  const newOrder = {
-    ...original,
-    orderDate: new Date().toISOString().split('T')[0],
-    itemStatus: 'pending',
-    orderId: generateNewOrderId()
-  };
-  orders.push(newOrder);
-  saveOrders();
-  renderOrders(document.getElementById('searchBar').value);
-  alert('Re-order placed with today\'s date and status set to pending.');
-}
+  function renderOrders(filter=''){
+    orderList.innerHTML = '';
+    const filtered = orders.filter(o => Object.values(o).join(' ').toLowerCase().includes(filter.toLowerCase()));
+    if (!filtered.length) { orderList.innerHTML='<p>No orders found.</p>'; return; }
 
-function generateNewOrderId() {
-  // Generate a simple new ID, e.g. max + 1 or timestamp
-  let maxId = 0;
-  orders.forEach(o => {
-    let num = parseInt(o.orderId);
-    if (!isNaN(num) && num > maxId) maxId = num;
-  });
-  return String(maxId + 1);
-}
+    filtered.forEach((o,i)=>{
+      const div = document.createElement('div');
+      div.className = 'order-entry';
+      div.innerHTML = `
+        <div><strong>#${o.orderId}</strong> – ${o.orderDate} – ${o.itemStatus}</div>
+        <div><span class="inline">Customer: ${o.customerName}</span>
+             <span class="inline">Item ID: ${o.itemId}</span>
+             <span class="inline">Qty: ${o.quantity}</span></div>
+        <div>Invoice: $${o.price} + tax $${o.tax}</div>
+        <div class="order-buttons">
+          <button onclick="deleteOrder(${i})">Delete</button>
+        </div>`;
+      orderList.appendChild(div);
+    });
+  }
 
-function modifyQuantity(index) {
-  const newQty = prompt('Enter new quantity:', orders[index].quantity);
-  if (newQty && !isNaN(newQty) && Number(newQty) > 0) {
-    orders[index].quantity = Number(newQty);
+  form.addEventListener('submit', e=>{
+    e.preventDefault();
+    const newO = {};
+    inputs.forEach(id => newO[id] = document.getElementById(id).value.trim());
+    orders.push(newO);
     saveOrders();
-    renderOrders(document.getElementById('searchBar').value);
-  } else {
-    alert('Invalid quantity.');
+    renderOrders();
+    clearInputs();
+  });
+
+  searchInput.addEventListener('input', e => renderOrders(e.target.value));
+
+  function deleteOrder(i){
+    orders.splice(i,1);
+    saveOrders();
+    renderOrders(searchInput.value);
   }
-}
 
-document.getElementById('searchBar').addEventListener('input', e => {
-  renderOrders(e.target.value);
-});
+  function logout(){
+    localStorage.removeItem('currentUser');
+    window.location.href='login.html';
+  }
 
-renderOrders();
+  renderOrders();
 </script>
 
 </body>
