@@ -4,14 +4,15 @@
   <meta charset="UTF-8" />
   <title>Products</title>
   <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
     form > div { margin-bottom: 8px; }
     table, th, td { border: 1px solid #ddd; border-collapse: collapse; padding: 5px; }
-    th { background-color: #f0f0f0; }
+    th { background: #f0f0f0; }
+    nav ul { list-style: none; display: flex; gap: 10px; padding: 0; }
+    nav a { text-decoration: none; color: #333; }
+    #logoutBtn { float: right; }
     .entry { margin-top: 10px; }
     button { cursor: pointer; }
-    nav ul { list-style:none; display:flex; gap:10px; padding:0; margin:0; background:#333; }
-    nav a { color: white; text-decoration:none; padding: 8px 12px; display:block; }
-    nav a:hover { background:#555; }
   </style>
 </head>
 <body>
@@ -23,119 +24,102 @@
     <li><a href="employee.html">Employees</a></li>
     <li><a href="orders.html">Orders</a></li>
   </ul>
+  <button id="logoutBtn" onclick="logout()">Logout</button>
 </nav>
+<hr>
 
 <h1>Products</h1>
 
 <form id="productForm">
   <div><label>Product Name: <input type="text" id="productName" required></label></div>
   <div><label>Product ID: <input type="text" id="productId" required></label></div>
-  <div><label>Price: <input type="number" id="price" min="0" step="0.01" required></label></div>
-  <div><label>Stock Quantity (kg): <input type="number" id="stockQuantity" min="0" step="1"></label></div>
+  <div><label>Price: <input type="number" id="price" required></label></div>
+  <div><label>Quantity (kg): <input type="number" id="quantity"></label></div>
+  <div><label>Product Location: <input type="text" id="location"></label></div>
   <button type="submit">Add Product</button>
 </form>
 
-<div style="margin-top: 10px;">
-  <input type="text" id="searchInput" placeholder="Search products..." style="width: 300px; padding:5px;">
+<div style="margin-top:10px">
+  <input type="text" id="searchInput" placeholder="Search products..." style="width:300px;padding:5px;" onkeydown="return event.key !== 'Enter';">
 </div>
 
 <div id="entries" class="entry"></div>
 
 <script>
-  // Only inputs present in the form
-  const inputs = ['productName','productId','price','stockQuantity'];
+  const currentUser = localStorage.getItem('currentUser');
+  if (!currentUser) window.location.href = 'login.html';
 
+  const inputs = ['productName','productId','price','quantity','location'];
   inputs.forEach(id => {
     const el = document.getElementById(id);
-    if (!el) return;
-    const saved = localStorage.getItem('product_' + id);
-    if (saved) el.value = saved;
-    el.addEventListener('input', () => {
-      localStorage.setItem('product_' + id, el.value);
-    });
+    el.value = localStorage.getItem(currentUser+'_product_'+id) || '';
+    el.addEventListener('input', () => localStorage.setItem(currentUser+'_product_'+id, el.value));
   });
 
   const form = document.getElementById('productForm');
   const entriesDiv = document.getElementById('entries');
-  let products = JSON.parse(localStorage.getItem('products')) || [];
+  const searchInput = document.getElementById('searchInput');
+  let products = JSON.parse(localStorage.getItem(currentUser+'_products') || '[]');
 
   function saveProducts() {
-    localStorage.setItem('products', JSON.stringify(products));
+    localStorage.setItem(currentUser+'_products', JSON.stringify(products));
   }
 
   function clearInputs() {
     inputs.forEach(id => {
       const el = document.getElementById(id);
-      if (el) {
-        el.value = '';
-        localStorage.removeItem('product_' + id);
-      }
+      el.value = '';
+      localStorage.removeItem(currentUser+'_product_'+id);
     });
   }
 
-  function renderList(filter = '') {
-    const filtered = products.filter(p => {
-      const combined = Object.values(p).join(' ').toLowerCase();
-      return combined.includes(filter.toLowerCase());
-    });
-
-    if (filtered.length === 0) {
-      entriesDiv.innerHTML = '<p>No products found.</p>';
-      return;
+  function renderList(filter='') {
+    const filtered = products.filter(p => Object.values(p).join(' ').toLowerCase().includes(filter.toLowerCase()));
+    if (!filtered.length) {
+      entriesDiv.innerHTML = '<p>No products found.</p>'; return;
     }
-
     let html = '<table><thead><tr>';
-    inputs.forEach(id => {
-      const label = id.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-      html += `<th>${label}</th>`;
-    });
+    inputs.forEach(id => html += `<th>${id.replace(/([A-Z])/g,' $1')}</th>`);
     html += '<th>Actions</th></tr></thead><tbody>';
-
-    filtered.forEach((p, i) => {
+    filtered.forEach((p,i) => {
       html += '<tr>';
-      inputs.forEach(id => {
-        html += `<td>${p[id] || ''}</td>`;
-      });
+      inputs.forEach(id => html += `<td>${p[id]||''}</td>`);
       html += `<td><button data-index="${i}" class="deleteBtn">Delete</button></td></tr>`;
     });
-
     html += '</tbody></table>';
     entriesDiv.innerHTML = html;
 
     document.querySelectorAll('.deleteBtn').forEach(btn => {
       btn.onclick = () => {
-        products.splice(btn.dataset.index, 1);
+        products.splice(btn.dataset.index,1);
         saveProducts();
-        renderList(document.getElementById('searchInput').value);
+        renderList(searchInput.value);
       };
     });
   }
 
   form.addEventListener('submit', e => {
     e.preventDefault();
-    const newProduct = {};
     let valid = true;
-
-    inputs.forEach(id => {
-      const val = document.getElementById(id).value.trim();
-      if ((id === 'productName' || id === 'productId' || id === 'price') && val === '') valid = false;
-      newProduct[id] = val;
+    const newP={};
+    inputs.forEach(id=>{
+      const v=document.getElementById(id).value.trim();
+      if ((id==='productName'||id==='productId'||id==='price')&& !v) valid=false;
+      newP[id]=v;
     });
-
-    if (!valid) {
-      alert('Product Name, Product ID, and Price are required.');
-      return;
-    }
-
-    products.push(newProduct);
+    if (!valid){alert('Name, ID, Price are required.');return;}
+    products.push(newP);
     saveProducts();
     renderList();
     clearInputs();
   });
 
-  document.getElementById('searchInput').addEventListener('input', e => {
-    renderList(e.target.value);
-  });
+  searchInput.addEventListener('input', e => renderList(e.target.value));
+
+  function logout(){
+    localStorage.removeItem('currentUser');
+    window.location.href='login.html';
+  }
 
   renderList();
 </script>
