@@ -4,28 +4,15 @@
   <meta charset="UTF-8" />
   <title>Customers</title>
   <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
     form > div { margin-bottom: 8px; }
     table, th, td { border: 1px solid #ddd; border-collapse: collapse; padding: 5px; }
     th { background-color: #f0f0f0; }
     .entry { margin-top: 10px; }
     button { cursor: pointer; }
-    nav ul {
-      list-style: none;
-      display: flex;
-      gap: 10px;
-      padding: 0;
-      margin: 0 0 10px 0;
-      background: #333;
-    }
-    nav a {
-      color: white;
-      text-decoration: none;
-      padding: 8px 12px;
-      display: block;
-    }
-    nav a:hover {
-      background: #555;
-    }
+    nav ul { list-style: none; display: flex; gap: 10px; padding: 0; }
+    nav a { text-decoration: none; color: #333; font-weight: bold; }
+    #logoutBtn { float: right; }
   </style>
 </head>
 <body>
@@ -37,7 +24,9 @@
     <li><a href="employee.html">Employees</a></li>
     <li><a href="orders.html">Orders</a></li>
   </ul>
+  <button id="logoutBtn" onclick="logout()">Logout</button>
 </nav>
+<hr>
 
 <h1>Customers</h1>
 
@@ -55,24 +44,28 @@
 </form>
 
 <div style="margin-top: 10px;">
-  <input type="text" id="searchInput" placeholder="Search customers..." style="width: 300px; padding:5px;">
+  <input type="text" id="searchInput" placeholder="Search customers..." style="width: 300px; padding:5px;" onkeydown="return event.key !== 'Enter';">
 </div>
 
 <div id="entries" class="entry"></div>
 
 <script>
+  const currentUser = localStorage.getItem('currentUser');
+  if (!currentUser) {
+    window.location.href = 'login.html';
+  }
+
   const inputs = [
     'firstName', 'lastName', 'address', 'city', 'state',
     'phone', 'email', 'product', 'productQuantity'
   ];
 
-  // Restore form fields from localStorage
   inputs.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
-      el.value = localStorage.getItem('customer_' + id) || '';
+      el.value = localStorage.getItem(currentUser + '_customer_' + id) || '';
       el.addEventListener('input', () => {
-        localStorage.setItem('customer_' + id, el.value);
+        localStorage.setItem(currentUser + '_customer_' + id, el.value);
       });
     }
   });
@@ -80,10 +73,10 @@
   const form = document.getElementById('customerForm');
   const entriesDiv = document.getElementById('entries');
   const searchInput = document.getElementById('searchInput');
-  let customers = JSON.parse(localStorage.getItem('customers') || '[]');
+  let customers = JSON.parse(localStorage.getItem(currentUser + '_customers') || '[]');
 
   function saveCustomers() {
-    localStorage.setItem('customers', JSON.stringify(customers));
+    localStorage.setItem(currentUser + '_customers', JSON.stringify(customers));
   }
 
   function clearInputs() {
@@ -91,15 +84,16 @@
       const el = document.getElementById(id);
       if (el) {
         el.value = '';
-        localStorage.removeItem('customer_' + id);
+        localStorage.removeItem(currentUser + '_customer_' + id);
       }
     });
   }
 
   function renderList(filter = '') {
-    const filtered = customers.filter(c =>
-      Object.values(c).join(' ').toLowerCase().includes(filter.toLowerCase())
-    );
+    const filtered = customers.filter(c => {
+      const values = Object.values(c).join(' ').toLowerCase();
+      return values.includes(filter.toLowerCase());
+    });
 
     if (filtered.length === 0) {
       entriesDiv.innerHTML = '<p>No customers found.</p>';
@@ -108,8 +102,7 @@
 
     let html = '<table><thead><tr>';
     inputs.forEach(id => {
-      const label = id.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-      html += `<th>${label}</th>`;
+      html += `<th>${id.replace(/([A-Z])/g, ' $1')}</th>`;
     });
     html += '<th>Actions</th></tr></thead><tbody>';
 
@@ -155,14 +148,14 @@
     clearInputs();
   });
 
-  searchInput.addEventListener('input', () => {
-    renderList(searchInput.value);
+  searchInput.addEventListener('input', e => {
+    renderList(e.target.value);
   });
 
-  // Prevent Enter key from submitting form inside the search box
-  searchInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') e.preventDefault();
-  });
+  function logout() {
+    localStorage.removeItem('currentUser');
+    window.location.href = 'login.html';
+  }
 
   renderList();
 </script>
