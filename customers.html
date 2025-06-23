@@ -139,7 +139,7 @@ function renderList(filter = '') {
       String(val).toLowerCase().includes(filter.toLowerCase())
     );
 });
-
+}
 
   if (filtered.length === 0) {
     entriesDiv.innerHTML = '<p>No customers found.</p>';
