@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Employee</title>
+  <title>Employees</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
     form > div { margin-bottom: 8px; }
@@ -11,7 +11,7 @@
     .entry { margin-top: 10px; }
     button { cursor: pointer; }
     nav ul { list-style: none; display: flex; gap: 10px; padding: 0; }
-    nav a { text-decoration: none; color: #333; font-weight: bold; }
+    nav a { text-decoration: none; color: white; font-weight: bold; }
     #logoutBtn { float: right; }
   </style>
 </head>
@@ -19,10 +19,10 @@
 
 <nav style="display: flex; justify-content: space-between; align-items: center; background: #333; padding: 10px;">
   <ul style="list-style: none; display: flex; gap: 15px; margin: 0; padding: 0;">
-    <li><a href="customers.html" style="color:white; text-decoration:none;">Customers</a></li>
-    <li><a href="product.html" style="color:white; text-decoration:none;">Products</a></li>
-    <li><a href="employee.html" style="color:white; text-decoration:none;">Employees</a></li>
-    <li><a href="orders.html" style="color:white; text-decoration:none;">Orders</a></li>
+    <li><a href="customers.html">Customers</a></li>
+    <li><a href="product.html">Products</a></li>
+    <li><a href="employee.html">Employees</a></li>
+    <li><a href="orders.html">Orders</a></li>
   </ul>
   <button id="logoutBtn" onclick="logout()" style="padding: 6px 10px; cursor: pointer;">Logout</button>
 </nav>
@@ -48,53 +48,147 @@
 
 <script>
   const currentUser = localStorage.getItem('currentUser');
-  if (!currentUser) window.location.href='login.html';
+  if (!currentUser) window.location.href = 'login.html';
 
   const inputs = ['firstName','lastName','employeeId','department','email','phone'];
-  inputs.forEach(id=>{
-    const el=document.getElementById(id);
-    el.value = localStorage.getItem(currentUser+'_employee_'+id) || '';
-    el.addEventListener('input',()=>localStorage.setItem(currentUser+'_employee_'+id,el.value));
+  inputs.forEach(id => {
+    const el = document.getElementById(id);
+    el.value = localStorage.getItem(`${currentUser}_employee_${id}`) || '';
+    el.addEventListener('input', () => {
+      localStorage.setItem(`${currentUser}_employee_${id}`, el.value);
+    });
   });
 
-  const form=document.getElementById('employeeForm');
-  const entriesDiv=document.getElementById('entries');
-  const searchInput=document.getElementById('searchInput');
+  const form = document.getElementById('employeeForm');
+  const entriesDiv = document.getElementById('entries');
+  const searchInput = document.getElementById('searchInput');
 
   const sampleEmployees = [
-    {firstName:"James", lastName:"Smith", employeeId:"E1001", department:"Sales", email:"james.smith@example.com", phone:"555-0101"},
-    {firstName:"Mary", lastName:"Johnson", employeeId:"E1002", department:"Marketing", email:"mary.johnson@example.com", phone:"555-0102"},
-    {firstName:"Robert", lastName:"Williams", employeeId:"E1003", department:"IT", email:"robert.williams@example.com", phone:"555-0103"},
-    {firstName:"Patricia", lastName:"Brown", employeeId:"E1004", department:"Finance", email:"patricia.brown@example.com", phone:"555-0104"},
-    {firstName:"Michael", lastName:"Jones", employeeId:"E1005", department:"Operations", email:"michael.jones@example.com", phone:"555-0105"},
-    {firstName:"Linda", lastName:"Garcia", employeeId:"E1006", department:"HR", email:"linda.garcia@example.com", phone:"555-0106"},
-    {firstName:"William", lastName:"Miller", employeeId:"E1007", department:"Sales", email:"william.miller@example.com", phone:"555-0107"},
-    {firstName:"Elizabeth", lastName:"Davis", employeeId:"E1008", department:"Marketing", email:"elizabeth.davis@example.com", phone:"555-0108"},
-    {firstName:"David", lastName:"Rodriguez", employeeId:"E1009", department:"IT", email:"david.rodriguez@example.com", phone:"555-0109"},
-    {firstName:"Barbara", lastName:"Martinez", employeeId:"E1010", department:"Finance", email:"barbara.martinez@example.com", phone:"555-0110"},
-    {firstName:"Richard", lastName:"Hernandez", employeeId:"E1011", department:"Operations", email:"richard.hernandez@example.com", phone:"555-0111"},
-    {firstName:"Susan", lastName:"Lopez", employeeId:"E1012", department:"HR", email:"susan.lopez@example.com", phone:"555-0112"},
-    {firstName:"Joseph", lastName:"Gonzalez", employeeId:"E1013", department:"Sales", email:"joseph.gonzalez@example.com", phone:"555-0113"},
-    {firstName:"Jessica", lastName:"Wilson", employeeId:"E1014", department:"Marketing", email:"jessica.wilson@example.com", phone:"555-0114"},
-    {firstName:"Thomas", lastName:"Anderson", employeeId:"E1015", department:"IT", email:"thomas.anderson@example.com", phone:"555-0115"},
-    {firstName:"Sarah", lastName:"Thomas", employeeId:"E1016", department:"Finance", email:"sarah.thomas@example.com", phone:"555-0116"},
-    {firstName:"Charles", lastName:"Taylor", employeeId:"E1017", department:"Operations", email:"charles.taylor@example.com", phone:"555-0117"},
-    {firstName:"Karen", lastName:"Moore", employeeId:"E1018", department:"HR", email:"karen.moore@example.com", phone:"555-0118"},
-    {firstName:"Christopher", lastName:"Jackson", employeeId:"E1019", department:"Sales", email:"christopher.jackson@example.com", phone:"555-0119"},
-    {firstName:"Nancy", lastName:"Martin", employeeId:"E1020", department:"Marketing", email:"nancy.martin@example.com", phone:"555-0120"},
-    {firstName:"Daniel", lastName:"Lee", employeeId:"E1021", department:"IT", email:"daniel.lee@example.com", phone:"555-0121"},
-    {firstName:"Lisa", lastName:"Perez", employeeId:"E1022", department:"Finance", email:"lisa.perez@example.com", phone:"555-0122"},
-    {firstName:"Matthew", lastName:"White", employeeId:"E1023", department:"Operations", email:"matthew.white@example.com", phone:"555-0123"},
-    {firstName:"Betty", lastName:"Harris", employeeId:"E1024", department:"HR", email:"betty.harris@example.com", phone:"555-0124"},
-    {firstName:"Anthony", lastName:"Sanchez", employeeId:"E1025", department:"Sales", email:"anthony.sanchez@example.com", phone:"555-0125"},
-    {firstName:"Margaret", lastName:"Clark", employeeId:"E1026", department:"Marketing", email:"margaret.clark@example.com", phone:"555-0126"},
-    {firstName:"Mark", lastName:"Ramirez", employeeId:"E1027", department:"IT", email:"mark.ramirez@example.com", phone:"555-0127"},
-    {firstName:"Sandra", lastName:"Lewis", employeeId:"E1028", department:"Finance", email:"sandra.lewis@example.com", phone:"555-0128"},
-    {firstName:"Paul", lastName:"Robinson", employeeId:"E1029", department:"Operations", email:"paul.robinson@example.com", phone:"555-0129"},
-    {firstName:"Ashley", lastName:"Walker", employeeId:"E1030", department:"HR", email:"ashley.walker@example.com", phone:"555-0130"},
-    {firstName:"Steven", lastName:"Young", employeeId:"E1031", department:"Sales", email:"steven.young@example.com", phone:"555-0131"},
-    {firstName:"Kimberly", lastName:"Allen", employeeId:"E1032", department:"Marketing", email:"kimberly.allen@example.com", phone:"555-0132"},
-    {firstName:"George", lastName:"King", employeeId:"E1033", department:"IT", email:"george.king@example.com", phone:"555-0133"},
-    {firstName:"Emily", lastName:"Scott", employeeId:"E1034", department:"Finance", email:"emily.scott@example.com", phone:"555-0134"},
-    {firstName:"Kenneth", lastName:"Green", employeeId:"E1035", department:"Operations", email:"kenneth.green@example.com", phone:"555-0135"},
-    {firstName:"Donna
+    {firstName:"Amy", lastName:"Nguyen", employeeId:"781293", department:"HR", email:"amy.nguyen@example.com", phone:"555-0143"},
+    {firstName:"Ben", lastName:"Harris", employeeId:"893745", department:"IT", email:"ben.harris@example.com", phone:"555-1284"},
+    {firstName:"Clara", lastName:"Davis", employeeId:"214578", department:"Logistics", email:"clara.davis@example.com", phone:"555-2059"},
+    {firstName:"David", lastName:"Lee", employeeId:"745631", department:"Production", email:"david.lee@example.com", phone:"555-1987"},
+    {firstName:"Emma", lastName:"Rodriguez", employeeId:"356901", department:"Sales", email:"emma.rodriguez@example.com", phone:"555-2231"},
+    {firstName:"Frank", lastName:"Thompson", employeeId:"439827", department:"HR", email:"frank.thompson@example.com", phone:"555-4572"},
+    {firstName:"Grace", lastName:"Lopez", employeeId:"990348", department:"IT", email:"grace.lopez@example.com", phone:"555-0194"},
+    {firstName:"Henry", lastName:"Kim", employeeId:"120394", department:"Sales", email:"henry.kim@example.com", phone:"555-2876"},
+    {firstName:"Isabel", lastName:"Peterson", employeeId:"581920", department:"Admin", email:"isabel.peterson@example.com", phone:"555-7654"},
+    {firstName:"Jake", lastName:"Martinez", employeeId:"479302", department:"Warehouse", email:"jake.martinez@example.com", phone:"555-6670"},
+    {firstName:"Kara", lastName:"Reed", employeeId:"328194", department:"Production", email:"kara.reed@example.com", phone:"555-0921"},
+    {firstName:"Leo", lastName:"Clark", employeeId:"923185", department:"Sales", email:"leo.clark@example.com", phone:"555-1763"},
+    {firstName:"Maya", lastName:"Wright", employeeId:"581904", department:"Admin", email:"maya.wright@example.com", phone:"555-9283"},
+    {firstName:"Nathan", lastName:"King", employeeId:"715920", department:"Logistics", email:"nathan.king@example.com", phone:"555-3516"},
+    {firstName:"Olivia", lastName:"Green", employeeId:"872310", department:"Finance", email:"olivia.green@example.com", phone:"555-1892"},
+    {firstName:"Paul", lastName:"Scott", employeeId:"101928", department:"Finance", email:"paul.scott@example.com", phone:"555-8830"},
+    {firstName:"Quinn", lastName:"Baker", employeeId:"384701", department:"Admin", email:"quinn.baker@example.com", phone:"555-7222"},
+    {firstName:"Rosa", lastName:"Hill", employeeId:"207491", department:"Logistics", email:"rosa.hill@example.com", phone:"555-2034"},
+    {firstName:"Sam", lastName:"Torres", employeeId:"660203", department:"Warehouse", email:"sam.torres@example.com", phone:"555-6332"},
+    {firstName:"Tina", lastName:"Price", employeeId:"192837", department:"HR", email:"tina.price@example.com", phone:"555-4471"},
+    {firstName:"Umar", lastName:"Cruz", employeeId:"818273", department:"Production", email:"umar.cruz@example.com", phone:"555-0192"},
+    {firstName:"Vera", lastName:"Barnes", employeeId:"384921", department:"Sales", email:"vera.barnes@example.com", phone:"555-8130"},
+    {firstName:"Wes", lastName:"Rivera", employeeId:"508203", department:"IT", email:"wes.rivera@example.com", phone:"555-5552"},
+    {firstName:"Xena", lastName:"Russell", employeeId:"284920", department:"Admin", email:"xena.russell@example.com", phone:"555-7421"},
+    {firstName:"Yusuf", lastName:"Long", employeeId:"902384", department:"Logistics", email:"yusuf.long@example.com", phone:"555-6161"},
+    {firstName:"Zara", lastName:"Jenkins", employeeId:"390284", department:"Warehouse", email:"zara.jenkins@example.com", phone:"555-2424"},
+    {firstName:"Alan", lastName:"Stone", employeeId:"483920", department:"IT", email:"alan.stone@example.com", phone:"555-4940"},
+    {firstName:"Betty", lastName:"Watson", employeeId:"219384", department:"HR", email:"betty.watson@example.com", phone:"555-2121"},
+    {firstName:"Caleb", lastName:"Owens", employeeId:"583902", department:"Finance", email:"caleb.owens@example.com", phone:"555-2020"},
+    {firstName:"Dana", lastName:"Stewart", employeeId:"384920", department:"Warehouse", email:"dana.stewart@example.com", phone:"555-4123"},
+    {firstName:"Evan", lastName:"Powell", employeeId:"120394", department:"Production", email:"evan.powell@example.com", phone:"555-6262"},
+    {firstName:"Faye", lastName:"Bryant", employeeId:"319048", department:"Sales", email:"faye.bryant@example.com", phone:"555-0101"},
+    {firstName:"Gavin", lastName:"Cox", employeeId:"581920", department:"Admin", email:"gavin.cox@example.com", phone:"555-2323"},
+    {firstName:"Holly", lastName:"Perry", employeeId:"728194", department:"Finance", email:"holly.perry@example.com", phone:"555-3939"},
+    {firstName:"Ivan", lastName:"Henderson", employeeId:"912384", department:"IT", email:"ivan.henderson@example.com", phone:"555-5151"},
+    {firstName:"Jill", lastName:"Coleman", employeeId:"892374", department:"Logistics", email:"jill.coleman@example.com", phone:"555-6263"},
+    {firstName:"Ken", lastName:"Sims", employeeId:"209384", department:"Warehouse", email:"ken.sims@example.com", phone:"555-7272"},
+    {firstName:"Lena", lastName:"Harvey", employeeId:"372018", department:"Sales", email:"lena.harvey@example.com", phone:"555-2021"},
+    {firstName:"Marcus", lastName:"Chapman", employeeId:"839102", department:"Admin", email:"marcus.chapman@example.com", phone:"555-8383"},
+    {firstName:"Nina", lastName:"Fields", employeeId:"472018", department:"HR", email:"nina.fields@example.com", phone:"555-9999"},
+    {firstName:"Owen", lastName:"Foster", employeeId:"209384", department:"IT", email:"owen.foster@example.com", phone:"555-7777"},
+    {firstName:"Penny", lastName:"Gonzales", employeeId:"920384", department:"Warehouse", email:"penny.gonzales@example.com", phone:"555-4444"},
+    {firstName:"Ron", lastName:"Murray", employeeId:"593847", department:"Production", email:"ron.murray@example.com", phone:"555-2122"},
+    {firstName:"Stacy", lastName:"Holmes", employeeId:"139284", department:"Sales", email:"stacy.holmes@example.com", phone:"555-4848"},
+    {firstName:"Tom", lastName:"Bishop", employeeId:"829301", department:"Finance", email:"tom.bishop@example.com", phone:"555-8888"},
+    {firstName:"Uma", lastName:"Griffin", employeeId:"394820", department:"HR", email:"uma.griffin@example.com", phone:"555-2324"},
+    {firstName:"Vince", lastName:"Larson", employeeId:"209384", department:"Admin", email:"vince.larson@example.com", phone:"555-9191"}
+  ];
+
+  let employees = JSON.parse(localStorage.getItem(`${currentUser}_employees`) || '[]');
+  if (employees.length === 0) {
+    employees = sampleEmployees;
+    localStorage.setItem(`${currentUser}_employees`, JSON.stringify(employees));
+  }
+
+  function saveEmployees() {
+    localStorage.setItem(`${currentUser}_employees`, JSON.stringify(employees));
+  }
+
+  function clearInputs() {
+    inputs.forEach(id => {
+      const el = document.getElementById(id);
+      el.value = '';
+      localStorage.removeItem(`${currentUser}_employee_${id}`);
+    });
+  }
+
+  function renderList(filter = '') {
+    const filtered = employees.filter(e =>
+      Object.values(e).join(' ').toLowerCase().includes(filter.toLowerCase())
+    );
+    if (!filtered.length) {
+      entriesDiv.innerHTML = '<p>No employees found.</p>';
+      return;
+    }
+    let html = '<table><thead><tr>';
+    inputs.forEach(id => html += `<th>${id.replace(/([A-Z])/g, ' $1')}</th>`);
+    html += '<th>Actions</th></tr></thead><tbody>';
+    filtered.forEach((emp, i) => {
+      html += '<tr>';
+      inputs.forEach(id => {
+        html += `<td>${emp[id] || ''}</td>`;
+      });
+      html += `<td><button data-index="${i}" class="deleteBtn">Delete</button></td></tr>`;
+    });
+    html += '</tbody></table>';
+    entriesDiv.innerHTML = html;
+
+    document.querySelectorAll('.deleteBtn').forEach(btn => {
+      btn.onclick = () => {
+        employees.splice(btn.dataset.index, 1);
+        saveEmployees();
+        renderList(searchInput.value);
+      };
+    });
+  }
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const newEmp = {};
+    let valid = true;
+    inputs.forEach(id => {
+      const v = document.getElementById(id).value.trim();
+      if ((id === 'firstName' || id === 'lastName') && !v) valid = false;
+      newEmp[id] = v;
+    });
+    if (!valid) {
+      alert('First and Last Name are required.');
+      return;
+    }
+    employees.push(newEmp);
+    saveEmployees();
+    renderList();
+    clearInputs();
+  });
+
+  searchInput.addEventListener('input', e => renderList(e.target.value));
+
+  function logout() {
+    localStorage.removeItem('currentUser');
+    window.location.href = 'login.html';
+  }
+
+  renderList();
+</script>
+
+</body>
+</html>
