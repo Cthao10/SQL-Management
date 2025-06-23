@@ -64,8 +64,10 @@
 <div id="orderList"></div>
 
 <script>
-  const currentUser = localStorage.getItem('currentUser');
-  if (!currentUser) window.location.href='login.html';
+  // Remove login redirect for simplicity (or keep if needed)
+  // const currentUser = localStorage.getItem('currentUser');
+  // if (!currentUser) window.location.href='login.html';
+  const currentUser = 'defaultUser';
 
   const inputs = [
     'orderId', 'orderDate', 'itemStatus', 'productName', 'productId',
@@ -73,6 +75,7 @@
     'destination', 'price'
   ];
 
+  // Load form input values from localStorage for current user
   inputs.forEach(id => {
     const el = document.getElementById(id);
     if(el) {
@@ -87,123 +90,128 @@
   const orderList = document.getElementById('orderList');
   const searchInput = document.getElementById('searchInput');
 
+  // Sample 50 orders with some customers repeated 1-5 times
   const sampleOrders = [
     { orderId: '100001', orderDate: '2025-06-01', itemStatus: 'pending', productName: 'GDL', productId: '100001', productLot: '500001', productLocation: 'Warehouse A', quantity: 150, employeeId: 'E001', customerName: 'James Smith', destination: 'New York', price: 1200.00 },
     { orderId: '100002', orderDate: '2025-06-02', itemStatus: 'shipped', productName: 'OCTA', productId: '200001', productLot: '600001', productLocation: 'Warehouse B', quantity: 300, employeeId: 'E002', customerName: 'Mary Johnson', destination: 'Los Angeles', price: 2400.00 },
     { orderId: '100003', orderDate: '2025-06-03', itemStatus: 'delivered', productName: 'HEXA', productId: '300001', productLot: '700001', productLocation: 'Warehouse C', quantity: 450, employeeId: 'E003', customerName: 'Robert Williams', destination: 'Chicago', price: 3600.00 },
     { orderId: '100004', orderDate: '2025-06-04', itemStatus: 'cancelled', productName: 'DDL', productId: '400001', productLot: '800001', productLocation: 'Warehouse D', quantity: 600, employeeId: 'E004', customerName: 'Patricia Brown', destination: 'Houston', price: 4800.00 },
     { orderId: '100005', orderDate: '2025-06-05', itemStatus: 'pending', productName: 'GDL', productId: '100001', productLot: '500001', productLocation: 'Warehouse A', quantity: 200, employeeId: 'E005', customerName: 'Michael Jones', destination: 'Phoenix', price: 1600.00 },
-
     { orderId: '100006', orderDate: '2025-06-06', itemStatus: 'shipped', productName: 'OCTA', productId: '200001', productLot: '600001', productLocation: 'Warehouse B', quantity: 350, employeeId: 'E006', customerName: 'Linda Garcia', destination: 'Philadelphia', price: 2800.00 },
     { orderId: '100007', orderDate: '2025-06-07', itemStatus: 'delivered', productName: 'HEXA', productId: '300001', productLot: '700001', productLocation: 'Warehouse C', quantity: 500, employeeId: 'E007', customerName: 'William Martinez', destination: 'San Antonio', price: 4000.00 },
     { orderId: '100008', orderDate: '2025-06-08', itemStatus: 'cancelled', productName: 'DDL', productId: '400001', productLot: '800001', productLocation: 'Warehouse D', quantity: 650, employeeId: 'E008', customerName: 'Barbara Rodriguez', destination: 'San Diego', price: 5200.00 },
     { orderId: '100009', orderDate: '2025-06-09', itemStatus: 'pending', productName: 'GDL', productId: '100001', productLot: '500001', productLocation: 'Warehouse A', quantity: 250, employeeId: 'E009', customerName: 'Richard Wilson', destination: 'Dallas', price: 2000.00 },
     { orderId: '100010', orderDate: '2025-06-10', itemStatus: 'shipped', productName: 'OCTA', productId: '200001', productLot: '600001', productLocation: 'Warehouse B', quantity: 400, employeeId: 'E010', customerName: 'Elizabeth Lee', destination: 'San Jose', price: 3200.00 },
 
-    { orderId: '100011', orderDate: '2025-06-11', itemStatus: 'delivered', productName: 'HEXA', productId: '300001', productLot: '700001', productLocation: 'Warehouse C', quantity: 550, employeeId: 'E011', customerName: 'James Smith', destination: 'Austin', price: 4400.00 },  // Repeat customer
+    { orderId: '100011', orderDate: '2025-06-11', itemStatus: 'delivered', productName: 'HEXA', productId: '300001', productLot: '700001', productLocation: 'Warehouse C', quantity: 550, employeeId: 'E011', customerName: 'James Smith', destination: 'Austin', price: 4400.00 },
     { orderId: '100012', orderDate: '2025-06-12', itemStatus: 'cancelled', productName: 'DDL', productId: '400001', productLot: '800001', productLocation: 'Warehouse D', quantity: 700, employeeId: 'E012', customerName: 'Susan Clark', destination: 'Jacksonville', price: 5600.00 },
     { orderId: '100013', orderDate: '2025-06-13', itemStatus: 'pending', productName: 'GDL', productId: '100001', productLot: '500001', productLocation: 'Warehouse A', quantity: 300, employeeId: 'E013', customerName: 'Joseph Lewis', destination: 'Fort Worth', price: 2400.00 },
-    { orderId: '100014', orderDate: '2025-06-14', itemStatus: 'shipped', productName: 'OCTA', productId: '200001', productLot: '600001', productLocation: 'Warehouse B', quantity: 450, employeeId: 'E014', customerName: 'Mary Johnson', destination: 'Columbus', price: 3600.00 }, // Repeat customer
+    { orderId: '100014', orderDate: '2025-06-14', itemStatus: 'shipped', productName: 'OCTA', productId: '200001', productLot: '600001', productLocation: 'Warehouse B', quantity: 450, employeeId: 'E014', customerName: 'Jessica Walker', destination: 'Columbus', price: 3600.00 },
     { orderId: '100015', orderDate: '2025-06-15', itemStatus: 'delivered', productName: 'HEXA', productId: '300001', productLot: '700001', productLocation: 'Warehouse C', quantity: 600, employeeId: 'E015', customerName: 'Thomas Hall', destination: 'Charlotte', price: 4800.00 },
-
     { orderId: '100016', orderDate: '2025-06-16', itemStatus: 'cancelled', productName: 'DDL', productId: '400001', productLot: '800001', productLocation: 'Warehouse D', quantity: 750, employeeId: 'E016', customerName: 'Sarah Allen', destination: 'San Francisco', price: 6000.00 },
     { orderId: '100017', orderDate: '2025-06-17', itemStatus: 'pending', productName: 'GDL', productId: '100001', productLot: '500001', productLocation: 'Warehouse A', quantity: 350, employeeId: 'E017', customerName: 'Christopher Young', destination: 'Indianapolis', price: 2800.00 },
     { orderId: '100018', orderDate: '2025-06-18', itemStatus: 'shipped', productName: 'OCTA', productId: '200001', productLot: '600001', productLocation: 'Warehouse B', quantity: 500, employeeId: 'E018', customerName: 'Karen King', destination: 'Seattle', price: 4000.00 },
     { orderId: '100019', orderDate: '2025-06-19', itemStatus: 'delivered', productName: 'HEXA', productId: '300001', productLot: '700001', productLocation: 'Warehouse C', quantity: 650, employeeId: 'E019', customerName: 'Matthew Wright', destination: 'Denver', price: 5200.00 },
     { orderId: '100020', orderDate: '2025-06-20', itemStatus: 'cancelled', productName: 'DDL', productId: '400001', productLot: '800001', productLocation: 'Warehouse D', quantity: 800, employeeId: 'E020', customerName: 'Nancy Scott', destination: 'Washington', price: 6400.00 },
 
-    { orderId: '100021', orderDate: '2025-06-21', itemStatus: 'pending', productName: 'GDL', productId: '100001', productLot: '500001', productLocation: 'Warehouse A', quantity: 400, employeeId: 'E021', customerName: 'Anthony Green', destination: 'Boston', price: 3200.00 },
-    { orderId: '100022', orderDate: '2025-06-22', itemStatus: 'shipped', productName: 'OCTA', productId: '200001', productLot: '600001', productLocation: 'Warehouse B', quantity: 550, employeeId: 'E022', customerName: 'Donna Adams', destination: 'El Paso', price: 4400.00 },
-    { orderId: '100023', orderDate: '2025-06-23', itemStatus: 'delivered', productName: 'HEXA', productId: '300001', productLot: '700001', productLocation: 'Warehouse C', quantity: 700, employeeId: 'E023', customerName: 'Mark Baker', destination: 'Detroit', price: 5600.00 },
-    { orderId: '100024', orderDate: '2025-06-24', itemStatus: 'cancelled', productName: 'DDL', productId: '400001', productLot: '800001', productLocation: 'Warehouse D', quantity: 850, employeeId: 'E024', customerName: 'Michelle Nelson', destination: 'Nashville', price: 6800.00 },
-    { orderId: '100025', orderDate: '2025-06-25', itemStatus: 'pending', productName: 'GDL', productId: '100001', productLot: '500001', productLocation: 'Warehouse A', quantity: 450, employeeId: 'E025', customerName: 'James Smith', destination: 'Memphis', price: 3600.00 }, // Repeat customer
+    { orderId: '100021', orderDate: '2025-06-21', itemStatus: 'pending', productName: 'GDL', productId: '100001', productLot: '500001', productLocation: 'Warehouse A', quantity: 400, employeeId: 'E021', customerName: 'James Smith', destination: 'Boston', price: 3200.00 },
+    { orderId: '100022', orderDate: '2025-06-22', itemStatus: 'shipped', productName: 'OCTA', productId: '200001', productLot: '600001', productLocation: 'Warehouse B', quantity: 550, employeeId: 'E022', customerName: 'Linda Garcia', destination: 'El Paso', price: 4400.00 },
+    { orderId: '100023', orderDate: '2025-06-23', itemStatus: 'delivered', productName: 'HEXA', productId: '300001', productLot: '700001', productLocation: 'Warehouse C', quantity: 700, employeeId: 'E023', customerName: 'Robert Williams', destination: 'Detroit', price: 5600.00 },
+    { orderId: '100024', orderDate: '2025-06-24', itemStatus: 'cancelled', productName: 'DDL', productId: '400001', productLot: '800001', productLocation: 'Warehouse D', quantity: 850, employeeId: 'E024', customerName: 'Barbara Rodriguez', destination: 'Nashville', price: 6800.00 },
+    { orderId: '100025', orderDate: '2025-06-25', itemStatus: 'pending', productName: 'GDL', productId: '100001', productLot: '500001', productLocation: 'Warehouse A', quantity: 450, employeeId: 'E025', customerName: 'Michael Jones', destination: 'Memphis', price: 3600.00 },
+    { orderId: '100026', orderDate: '2025-06-26', itemStatus: 'shipped', productName: 'OCTA', productId: '200001', productLot: '600001', productLocation: 'Warehouse B', quantity: 600, employeeId: 'E026', customerName: 'Elizabeth Lee', destination: 'Louisville', price: 4800.00 },
+    { orderId: '100027', orderDate: '2025-06-27', itemStatus: 'delivered', productName: 'HEXA', productId: '300001', productLot: '700001', productLocation: 'Warehouse C', quantity: 750, employeeId: 'E027', customerName: 'William Martinez', destination: 'Baltimore', price: 6000.00 },
+    { orderId: '100028', orderDate: '2025-06-28', itemStatus: 'cancelled', productName: 'DDL', productId: '400001', productLot: '800001', productLocation: 'Warehouse D', quantity: 900, employeeId: 'E028', customerName: 'Richard Wilson', destination: 'Milwaukee', price: 7200.00 },
+    { orderId: '100029', orderDate: '2025-06-29', itemStatus: 'pending', productName: 'GDL', productId: '100001', productLot: '500001', productLocation: 'Warehouse A', quantity: 500, employeeId: 'E029', customerName: 'Sarah Allen', destination: 'Albuquerque', price: 4000.00 },
+    { orderId: '100030', orderDate: '2025-06-30', itemStatus: 'shipped', productName: 'OCTA', productId: '200001', productLot: '600001', productLocation: 'Warehouse B', quantity: 650, employeeId: 'E030', customerName: 'Karen King', destination: 'Tucson', price: 5200.00 },
 
-    { orderId: '100026', orderDate: '2025-06-26', itemStatus: 'shipped', productName: 'OCTA', productId: '200001', productLot: '600001', productLocation: 'Warehouse B', quantity: 600, employeeId: 'E026', customerName: 'Laura Carter', destination: 'Portland', price: 4800.00 },
-    { orderId: '100027', orderDate: '2025-06-27', itemStatus: 'delivered', productName: 'HEXA', productId: '300001', productLot: '700001', productLocation: 'Warehouse C', quantity: 750, employeeId: 'E027', customerName: 'Daniel Mitchell', destination: 'Oklahoma City', price: 6000.00 },
-    { orderId: '100028', orderDate: '2025-06-28', itemStatus: 'cancelled', productName: 'DDL', productId: '400001', productLot: '800001', productLocation: 'Warehouse D', quantity: 900, employeeId: 'E028', customerName: 'Rebecca Perez', destination: 'Las Vegas', price: 7200.00 },
-    { orderId: '100029', orderDate: '2025-06-29', itemStatus: 'pending', productName: 'GDL', productId: '100001', productLot: '500001', productLocation: 'Warehouse A', quantity: 500, employeeId: 'E029', customerName: 'George Roberts', destination: 'Louisville', price: 4000.00 },
-    { orderId: '100030', orderDate: '2025-06-30', itemStatus: 'shipped', productName: 'OCTA', productId: '200001', productLot: '600001', productLocation: 'Warehouse B', quantity: 650, employeeId: 'E030', customerName: 'Susan Clark', destination: 'Baltimore', price: 5200.00 }, // Repeat customer
+    { orderId: '100031', orderDate: '2025-07-01', itemStatus: 'delivered', productName: 'HEXA', productId: '300001', productLot: '700001', productLocation: 'Warehouse C', quantity: 800, employeeId: 'E031', customerName: 'Matthew Wright', destination: 'Fresno', price: 6400.00 },
+    { orderId: '100032', orderDate: '2025-07-02', itemStatus: 'cancelled', productName: 'DDL', productId: '400001', productLot: '800001', productLocation: 'Warehouse D', quantity: 950, employeeId: 'E032', customerName: 'Nancy Scott', destination: 'Sacramento', price: 7600.00 },
+    { orderId: '100033', orderDate: '2025-07-03', itemStatus: 'pending', productName: 'GDL', productId: '100001', productLot: '500001', productLocation: 'Warehouse A', quantity: 850, employeeId: 'E033', customerName: 'Joseph Lewis', destination: 'Kansas City', price: 6800.00 },
+    { orderId: '100034', orderDate: '2025-07-04', itemStatus: 'shipped', productName: 'OCTA', productId: '200001', productLot: '600001', productLocation: 'Warehouse B', quantity: 900, employeeId: 'E034', customerName: 'Jessica Walker', destination: 'Mesa', price: 7200.00 },
+    { orderId: '100035', orderDate: '2025-07-05', itemStatus: 'delivered', productName: 'HEXA', productId: '300001', productLot: '700001', productLocation: 'Warehouse C', quantity: 950, employeeId: 'E035', customerName: 'Thomas Hall', destination: 'Atlanta', price: 7600.00 },
+    { orderId: '100036', orderDate: '2025-07-06', itemStatus: 'cancelled', productName: 'DDL', productId: '400001', productLot: '800001', productLocation: 'Warehouse D', quantity: 1000, employeeId: 'E036', customerName: 'Sarah Allen', destination: 'Colorado Springs', price: 8000.00 },
+    { orderId: '100037', orderDate: '2025-07-07', itemStatus: 'pending', productName: 'GDL', productId: '100001', productLot: '500001', productLocation: 'Warehouse A', quantity: 1000, employeeId: 'E037', customerName: 'Christopher Young', destination: 'Raleigh', price: 8000.00 },
+    { orderId: '100038', orderDate: '2025-07-08', itemStatus: 'shipped', productName: 'OCTA', productId: '200001', productLot: '600001', productLocation: 'Warehouse B', quantity: 1050, employeeId: 'E038', customerName: 'Karen King', destination: 'Omaha', price: 8400.00 },
+    { orderId: '100039', orderDate: '2025-07-09', itemStatus: 'delivered', productName: 'HEXA', productId: '300001', productLot: '700001', productLocation: 'Warehouse C', quantity: 1100, employeeId: 'E039', customerName: 'Matthew Wright', destination: 'Miami', price: 8800.00 },
+    { orderId: '100040', orderDate: '2025-07-10', itemStatus: 'cancelled', productName: 'DDL', productId: '400001', productLot: '800001', productLocation: 'Warehouse D', quantity: 1150, employeeId: 'E040', customerName: 'Nancy Scott', destination: 'Tulsa', price: 9200.00 },
 
-    { orderId: '100031', orderDate: '2025-07-01', itemStatus: 'delivered', productName: 'HEXA', productId: '300001', productLot: '700001', productLocation: 'Warehouse C', quantity: 800, employeeId: 'E031', customerName: 'James Smith', destination: 'Milwaukee', price: 6400.00 }, // Repeat customer
-    { orderId: '100032', orderDate: '2025-07-02', itemStatus: 'cancelled', productName: 'DDL', productId: '400001', productLot: '800001', productLocation: 'Warehouse D', quantity: 950, employeeId: 'E032', customerName: 'Patricia Brown', destination: 'Albuquerque', price: 7600.00 },
-    { orderId: '100033', orderDate: '2025-07-03', itemStatus: 'pending', productName: 'GDL', productId: '100001', productLot: '500001', productLocation: 'Warehouse A', quantity: 550, employeeId: 'E033', customerName: 'Mary Johnson', destination: 'Tucson', price: 4400.00 }, // Repeat customer
-    { orderId: '100034', orderDate: '2025-07-04', itemStatus: 'shipped', productName: 'OCTA', productId: '200001', productLot: '600001', productLocation: 'Warehouse B', quantity: 700, employeeId: 'E034', customerName: 'Michael Jones', destination: 'Fresno', price: 5600.00 },
-    { orderId: '100035', orderDate: '2025-07-05', itemStatus: 'delivered', productName: 'HEXA', productId: '300001', productLot: '700001', productLocation: 'Warehouse C', quantity: 850, employeeId: 'E035', customerName: 'John Martinez', destination: 'Sacramento', price: 6800.00 },
-
-    { orderId: '100036', orderDate: '2025-07-06', itemStatus: 'cancelled', productName: 'DDL', productId: '400001', productLot: '800001', productLocation: 'Warehouse D', quantity: 1000, employeeId: 'E036', customerName: 'Barbara Rodriguez', destination: 'Kansas City', price: 8000.00 },
-    { orderId: '100037', orderDate: '2025-07-07', itemStatus: 'pending', productName: 'GDL', productId: '100001', productLot: '500001', productLocation: 'Warehouse A', quantity: 600, employeeId: 'E037', customerName: 'Richard Wilson', destination: 'Mesa', price: 4800.00 },
-    { orderId: '100038', orderDate: '2025-07-08', itemStatus: 'shipped', productName: 'OCTA', productId: '200001', productLot: '600001', productLocation: 'Warehouse B', quantity: 650, employeeId: 'E038', customerName: 'Joseph Lewis', destination: 'Atlanta', price: 5200.00 },
-    { orderId: '100039', orderDate: '2025-07-09', itemStatus: 'delivered', productName: 'HEXA', productId: '300001', productLot: '700001', productLocation: 'Warehouse C', quantity: 700, employeeId: 'E039', customerName: 'Mary Johnson', destination: 'Omaha', price: 5600.00 }, // Repeat customer
-    { orderId: '100040', orderDate: '2025-07-10', itemStatus: 'cancelled', productName: 'DDL', productId: '400001', productLot: '800001', productLocation: 'Warehouse D', quantity: 750, employeeId: 'E040', customerName: 'David Turner', destination: 'Raleigh', price: 6000.00 },
-
-    { orderId: '100041', orderDate: '2025-07-11', itemStatus: 'pending', productName: 'GDL', productId: '100001', productLot: '500001', productLocation: 'Warehouse A', quantity: 550, employeeId: 'E041', customerName: 'James Smith', destination: 'Miami', price: 4400.00 }, // Repeat customer
-    { orderId: '100042', orderDate: '2025-07-12', itemStatus: 'shipped', productName: 'OCTA', productId: '200001', productLot: '600001', productLocation: 'Warehouse B', quantity: 600, employeeId: 'E042', customerName: 'Sarah Allen', destination: 'Long Beach', price: 4800.00 },
-    { orderId: '100043', orderDate: '2025-07-13', itemStatus: 'delivered', productName: 'HEXA', productId: '300001', productLot: '700001', productLocation: 'Warehouse C', quantity: 650, employeeId: 'E043', customerName: 'Thomas Hall', destination: 'Virginia Beach', price: 5200.00 },
-    { orderId: '100044', orderDate: '2025-07-14', itemStatus: 'cancelled', productName: 'DDL', productId: '400001', productLot: '800001', productLocation: 'Warehouse D', quantity: 700, employeeId: 'E044', customerName: 'Mary Johnson', destination: 'Oakland', price: 5600.00 }, // Repeat customer
-    { orderId: '100045', orderDate: '2025-07-15', itemStatus: 'pending', productName: 'GDL', productId: '100001', productLot: '500001', productLocation: 'Warehouse A', quantity: 650, employeeId: 'E045', customerName: 'Mark Baker', destination: 'Minneapolis', price: 5200.00 },
-
-    { orderId: '100046', orderDate: '2025-07-16', itemStatus: 'shipped', productName: 'OCTA', productId: '200001', productLot: '600001', productLocation: 'Warehouse B', quantity: 700, employeeId: 'E046', customerName: 'Patricia Brown', destination: 'Tulsa', price: 5600.00 },
-    { orderId: '100047', orderDate: '2025-07-17', itemStatus: 'delivered', productName: 'HEXA', productId: '300001', productLot: '700001', productLocation: 'Warehouse C', quantity: 750, employeeId: 'E047', customerName: 'John Martinez', destination: 'Arlington', price: 6000.00 },
-    { orderId: '100048', orderDate: '2025-07-18', itemStatus: 'cancelled', productName: 'DDL', productId: '400001', productLot: '800001', productLocation: 'Warehouse D', quantity: 800, employeeId: 'E048', customerName: 'Susan Clark', destination: 'New Orleans', price: 6400.00 }, // Repeat customer
-    { orderId: '100049', orderDate: '2025-07-19', itemStatus: 'pending', productName: 'GDL', productId: '100001', productLot: '500001', productLocation: 'Warehouse A', quantity: 700, employeeId: 'E049', customerName: 'Elizabeth Lee', destination: 'Wichita', price: 5600.00 },
-    { orderId: '100050', orderDate: '2025-07-20', itemStatus: 'shipped', productName: 'OCTA', productId: '200001', productLot: '600001', productLocation: 'Warehouse B', quantity: 750, employeeId: 'E050', customerName: 'James Smith', destination: 'Cleveland', price: 6000.00 }  // Repeat customer
+    { orderId: '100041', orderDate: '2025-07-11', itemStatus: 'pending', productName: 'GDL', productId: '100001', productLot: '500001', productLocation: 'Warehouse A', quantity: 1100, employeeId: 'E041', customerName: 'James Smith', destination: 'Wichita', price: 8800.00 },
+    { orderId: '100042', orderDate: '2025-07-12', itemStatus: 'shipped', productName: 'OCTA', productId: '200001', productLot: '600001', productLocation: 'Warehouse B', quantity: 1150, employeeId: 'E042', customerName: 'Linda Garcia', destination: 'New Orleans', price: 9200.00 },
+    { orderId: '100043', orderDate: '2025-07-13', itemStatus: 'delivered', productName: 'HEXA', productId: '300001', productLot: '700001', productLocation: 'Warehouse C', quantity: 1200, employeeId: 'E043', customerName: 'Robert Williams', destination: 'Arlington', price: 9600.00 },
+    { orderId: '100044', orderDate: '2025-07-14', itemStatus: 'cancelled', productName: 'DDL', productId: '400001', productLot: '800001', productLocation: 'Warehouse D', quantity: 1250, employeeId: 'E044', customerName: 'Barbara Rodriguez', destination: 'Bakersfield', price: 10000.00 },
+    { orderId: '100045', orderDate: '2025-07-15', itemStatus: 'pending', productName: 'GDL', productId: '100001', productLot: '500001', productLocation: 'Warehouse A', quantity: 1150, employeeId: 'E045', customerName: 'Michael Jones', destination: 'Tampa', price: 9200.00 },
+    { orderId: '100046', orderDate: '2025-07-16', itemStatus: 'shipped', productName: 'OCTA', productId: '200001', productLot: '600001', productLocation: 'Warehouse B', quantity: 1200, employeeId: 'E046', customerName: 'Elizabeth Lee', destination: 'Aurora', price: 9600.00 },
+    { orderId: '100047', orderDate: '2025-07-17', itemStatus: 'delivered', productName: 'HEXA', productId: '300001', productLot: '700001', productLocation: 'Warehouse C', quantity: 1250, employeeId: 'E047', customerName: 'William Martinez', destination: 'Santa Ana', price: 10000.00 },
+    { orderId: '100048', orderDate: '2025-07-18', itemStatus: 'cancelled', productName: 'DDL', productId: '400001', productLot: '800001', productLocation: 'Warehouse D', quantity: 1300, employeeId: 'E048', customerName: 'Richard Wilson', destination: 'St. Louis', price: 10400.00 },
+    { orderId: '100049', orderDate: '2025-07-19', itemStatus: 'pending', productName: 'GDL', productId: '100001', productLot: '500001', productLocation: 'Warehouse A', quantity: 1200, employeeId: 'E049', customerName: 'Sarah Allen', destination: 'Pittsburgh', price: 9600.00 },
+    { orderId: '100050', orderDate: '2025-07-20', itemStatus: 'shipped', productName: 'OCTA', productId: '200001', productLot: '600001', productLocation: 'Warehouse B', quantity: 1250, employeeId: 'E050', customerName: 'Karen King', destination: 'Cincinnati', price: 10000.00 },
   ];
 
+  // Load orders from localStorage or fallback to sample data
   let orders = JSON.parse(localStorage.getItem(currentUser + '_orders')) || sampleOrders;
 
+  // Save to localStorage
   function saveOrders() {
     localStorage.setItem(currentUser + '_orders', JSON.stringify(orders));
   }
 
+  // Render orders based on search filter
   function renderOrders(filter = '') {
-  const term = filter.toLowerCase();
+    const term = filter.toLowerCase().trim();
 
-  // Filter orders by any field containing the search term
-  const filteredOrders = orders.filter(order => {
-    return Object.values(order).some(val =>
-      String(val).toLowerCase().includes(term)
-    );
-  });
-
-  if (filteredOrders.length === 0) {
-    orderList.innerHTML = '<p>No matching orders found.</p>';
-    return;
-  }
-
-  // Render all filtered orders (no grouping)
-  orderList.innerHTML = filteredOrders.map(order => `
-    <div class="order-entry">
-      <div><strong>Order ID:</strong> ${order.orderId}</div>
-      <div><strong>Customer:</strong> ${order.customerName}</div>
-      <div><strong>Date:</strong> ${order.orderDate}</div>
-      <div><strong>Status:</strong> ${order.itemStatus}</div>
-      <div><strong>Product:</strong> ${order.productName}</div>
-      <div><strong>Quantity:</strong> ${order.quantity} kg</div>
-      <div><strong>Price:</strong> $${order.price.toFixed(2)}</div>
-      <button onclick="deleteOrder('${order.orderId}')">Delete</button>
-    </div>
-  `).join('');
-}
-
-
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    const newOrder = {};
-    let valid = true;
-
-    inputs.forEach(id => {
-      const el = document.getElementById(id);
-      if(!el.value) valid = false;
-      newOrder[id] = el.type === 'number' ? parseFloat(el.value) : el.value;
+    const filteredOrders = orders.filter(order => {
+      // check if any field contains the search term
+      return Object.values(order).some(val =>
+        String(val).toLowerCase().includes(term)
+      );
     });
 
-    if(!valid) {
-      alert('Please fill in all required fields.');
+    if (filteredOrders.length === 0) {
+      orderList.innerHTML = '<p>No matching orders found.</p>';
       return;
     }
 
-    // Check duplicate orderId
-    if(orders.find(o => o.orderId === newOrder.orderId)) {
+    orderList.innerHTML = filteredOrders.map((o, i) => `
+      <div class="order-entry">
+        <div><strong>Order ID:</strong> ${o.orderId}</div>
+        <div><strong>Order Date:</strong> ${o.orderDate}</div>
+        <div><strong>Status:</strong> ${o.itemStatus}</div>
+        <div><strong>Product Name:</strong> ${o.productName}</div>
+        <div><strong>Product Id:</strong> ${o.productId}</div>
+        <div><strong>Product Lot:</strong> ${o.productLot}</div>
+        <div><strong>Product Location:</strong> ${o.productLocation}</div>
+        <div><strong>Quantity (kg):</strong> ${o.quantity}</div>
+        <div><strong>Employee Id:</strong> ${o.employeeId}</div>
+        <div><strong>Customer Name:</strong> ${o.customerName}</div>
+        <div><strong>Destination:</strong> ${o.destination}</div>
+        <div><strong>Price ($):</strong> $${Number(o.price).toFixed(2)}</div>
+        <div class="order-buttons">
+          <button onclick="deleteOrder(${i})">Delete</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Add new order
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+
+    const newOrder = {};
+    let missingField = false;
+    inputs.forEach(id => {
+      const val = document.getElementById(id).value.trim();
+      if (!val && id !== 'productId' && id !== 'productLot') missingField = true;
+      newOrder[id] = (id === 'quantity' || id === 'price') ? Number(val) : val;
+    });
+
+    if (missingField) {
+      alert('Please fill all required fields.');
+      return;
+    }
+
+    // Check for duplicate orderId
+    if (orders.some(o => o.orderId === newOrder.orderId)) {
       alert('Order ID already exists.');
       return;
     }
@@ -211,49 +219,35 @@
     orders.push(newOrder);
     saveOrders();
     renderOrders(searchInput.value);
-
     form.reset();
     inputs.forEach(id => localStorage.removeItem(currentUser + '_order_' + id));
   });
 
-  function deleteOrder(id) {
-    if(!confirm('Delete order ' + id + '?')) return;
-    orders = orders.filter(o => o.orderId !== id);
-    saveOrders();
-    renderOrders(searchInput.value);
+  // Delete order by index
+  function deleteOrder(index) {
+    if (confirm('Delete this order?')) {
+      orders.splice(index, 1);
+      saveOrders();
+      renderOrders(searchInput.value);
+    }
   }
 
-  function viewDetail(id) {
-    alert('Showing details for order: ' + id);
-  }
-
-  function reorder(id) {
-    alert('Re-ordering for order: ' + id);
-  }
-
-  function modifyQuantity(id) {
-    const order = orders.find(o => o.orderId === id);
-    if(!order) return alert('Order not found');
-    const qty = prompt('Enter new quantity (kg):', order.quantity);
-    if(qty === null) return;
-    const numQty = parseFloat(qty);
-    if(isNaN(numQty) || numQty <= 0) return alert('Invalid quantity');
-    order.quantity = numQty;
-    saveOrders();
-    renderOrders(searchInput.value);
-  }
-
+  // Search input listener with debounce
+  let searchTimeout;
   searchInput.addEventListener('input', () => {
-    renderOrders(searchInput.value);
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      renderOrders(searchInput.value);
+    }, 300);
   });
 
-  function logout() {
-    localStorage.removeItem('currentUser');
-    window.location.href = 'login.html';
-  }
-
+  // Initial render
   renderOrders();
-</script>
 
+  // Logout stub
+  function logout() {
+    alert('Logout clicked');
+  }
+</script>
 </body>
 </html>
