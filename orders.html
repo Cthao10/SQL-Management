@@ -156,41 +156,35 @@
   }
 
   function renderOrders(filter = '') {
-    const term = filter.toLowerCase();
-    const filtered = orders.filter(order => {
-      return Object.values(order).some(val =>
-        String(val).toLowerCase().includes(term)
-      );
-    });
+  const term = filter.toLowerCase();
 
-    if(filtered.length === 0) {
-      orderList.innerHTML = '<p>No matching orders found.</p>';
-      return;
-    }
+  // Filter orders by any field containing the search term
+  const filteredOrders = orders.filter(order => {
+    return Object.values(order).some(val =>
+      String(val).toLowerCase().includes(term)
+    );
+  });
 
-    orderList.innerHTML = filtered.map(order => `
-      <div class="order-entry">
-        <div><strong>Order ID:</strong> ${order.orderId}</div>
-        <div><strong>Date:</strong> ${order.orderDate}</div>
-        <div><strong>Status:</strong> ${order.itemStatus}</div>
-        <div><strong>Product:</strong> ${order.productName} (ID: ${order.productId})</div>
-        <div><strong>Lot:</strong> ${order.productLot}</div>
-        <div><strong>Location:</strong> ${order.productLocation}</div>
-        <div><strong>Quantity:</strong> ${order.quantity} kg</div>
-        <div><strong>Employee ID:</strong> ${order.employeeId}</div>
-        <div><strong>Customer:</strong> ${order.customerName}</div>
-        <div><strong>Destination:</strong> ${order.destination}</div>
-        <div><strong>Price:</strong> $${order.price.toFixed(2)}</div>
-
-        <div class="order-buttons">
-          <button onclick="viewDetail('${order.orderId}')">View Detail</button>
-          <button onclick="reorder('${order.orderId}')">Re-Order</button>
-          <button onclick="modifyQuantity('${order.orderId}')">Modify Quantity</button>
-          <button onclick="deleteOrder('${order.orderId}')">Delete</button>
-        </div>
-      </div>
-    `).join('');
+  if (filteredOrders.length === 0) {
+    orderList.innerHTML = '<p>No matching orders found.</p>';
+    return;
   }
+
+  // Render all filtered orders (no grouping)
+  orderList.innerHTML = filteredOrders.map(order => `
+    <div class="order-entry">
+      <div><strong>Order ID:</strong> ${order.orderId}</div>
+      <div><strong>Customer:</strong> ${order.customerName}</div>
+      <div><strong>Date:</strong> ${order.orderDate}</div>
+      <div><strong>Status:</strong> ${order.itemStatus}</div>
+      <div><strong>Product:</strong> ${order.productName}</div>
+      <div><strong>Quantity:</strong> ${order.quantity} kg</div>
+      <div><strong>Price:</strong> $${order.price.toFixed(2)}</div>
+      <button onclick="deleteOrder('${order.orderId}')">Delete</button>
+    </div>
+  `).join('');
+}
+
 
   form.addEventListener('submit', e => {
     e.preventDefault();
