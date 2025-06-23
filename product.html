@@ -50,41 +50,115 @@
   const currentUser = localStorage.getItem('currentUser');
   if (!currentUser) window.location.href = 'login.html';
 
-  const inputs = ['productName','productId','price','quantity','location'];
+  const inputs = ['productName', 'productId', 'productLot', 'location', 'price', 'quantity'];
   inputs.forEach(id => {
     const el = document.getElementById(id);
-    el.value = localStorage.getItem(currentUser+'_product_'+id) || '';
-    el.addEventListener('input', () => localStorage.setItem(currentUser+'_product_'+id, el.value));
+    if(el) {
+      el.value = localStorage.getItem(currentUser + '_product_' + id) || '';
+      el.addEventListener('input', () => localStorage.setItem(currentUser + '_product_' + id, el.value));
+    }
   });
 
   const form = document.getElementById('productForm');
   const entriesDiv = document.getElementById('entries');
   const searchInput = document.getElementById('searchInput');
-  let products = JSON.parse(localStorage.getItem(currentUser+'_products') || '[]');
+
+  const sampleProducts = [
+    {productName:'GDL', productId:'100001', productLot:'500001', location:'Warehouse A', price:1500, quantity:500},
+    {productName:'GDL', productId:'100002', productLot:'500001', location:'Warehouse A', price:1600, quantity:600},
+    {productName:'GDL', productId:'100003', productLot:'500001', location:'Warehouse B', price:1550, quantity:550},
+    {productName:'GDL', productId:'100004', productLot:'500001', location:'Warehouse B', price:1520, quantity:580},
+    {productName:'GDL', productId:'100005', productLot:'500001', location:'Warehouse C', price:1580, quantity:570},
+
+    {productName:'OCTA', productId:'200001', productLot:'600001', location:'Warehouse A', price:2000, quantity:700},
+    {productName:'OCTA', productId:'200002', productLot:'600001', location:'Warehouse A', price:2100, quantity:750},
+    {productName:'OCTA', productId:'200003', productLot:'600001', location:'Warehouse B', price:2050, quantity:720},
+    {productName:'OCTA', productId:'200004', productLot:'600001', location:'Warehouse B', price:2080, quantity:710},
+    {productName:'OCTA', productId:'200005', productLot:'600001', location:'Warehouse C', price:2150, quantity:730},
+
+    {productName:'HEXA', productId:'300001', productLot:'700001', location:'Warehouse A', price:2500, quantity:800},
+    {productName:'HEXA', productId:'300002', productLot:'700001', location:'Warehouse A', price:2600, quantity:850},
+    {productName:'HEXA', productId:'300003', productLot:'700001', location:'Warehouse B', price:2550, quantity:830},
+    {productName:'HEXA', productId:'300004', productLot:'700001', location:'Warehouse B', price:2520, quantity:820},
+    {productName:'HEXA', productId:'300005', productLot:'700001', location:'Warehouse C', price:2580, quantity:840},
+
+    {productName:'DDL', productId:'400001', productLot:'800001', location:'Warehouse A', price:3000, quantity:900},
+    {productName:'DDL', productId:'400002', productLot:'800001', location:'Warehouse A', price:3100, quantity:950},
+    {productName:'DDL', productId:'400003', productLot:'800001', location:'Warehouse B', price:3050, quantity:920},
+    {productName:'DDL', productId:'400004', productLot:'800001', location:'Warehouse B', price:3020, quantity:910},
+    {productName:'DDL', productId:'400005', productLot:'800001', location:'Warehouse C', price:3080, quantity:940},
+
+    // 30 more random entries (repeating names with varying IDs, locations, prices, quantities)
+    {productName:'GDL', productId:'100006', productLot:'500001', location:'Warehouse C', price:1540, quantity:560},
+    {productName:'GDL', productId:'100007', productLot:'500001', location:'Warehouse D', price:1570, quantity:590},
+    {productName:'OCTA', productId:'200006', productLot:'600001', location:'Warehouse D', price:2120, quantity:760},
+    {productName:'OCTA', productId:'200007', productLot:'600001', location:'Warehouse E', price:2130, quantity:770},
+    {productName:'HEXA', productId:'300006', productLot:'700001', location:'Warehouse D', price:2630, quantity:860},
+    {productName:'HEXA', productId:'300007', productLot:'700001', location:'Warehouse E', price:2640, quantity:870},
+    {productName:'DDL', productId:'400006', productLot:'800001', location:'Warehouse D', price:3120, quantity:960},
+    {productName:'DDL', productId:'400007', productLot:'800001', location:'Warehouse E', price:3130, quantity:970},
+    {productName:'GDL', productId:'100008', productLot:'500001', location:'Warehouse E', price:1590, quantity:600},
+    {productName:'GDL', productId:'100009', productLot:'500001', location:'Warehouse F', price:1600, quantity:610},
+
+    {productName:'OCTA', productId:'200008', productLot:'600001', location:'Warehouse F', price:2140, quantity:780},
+    {productName:'OCTA', productId:'200009', productLot:'600001', location:'Warehouse G', price:2150, quantity:790},
+    {productName:'HEXA', productId:'300008', productLot:'700001', location:'Warehouse F', price:2650, quantity:880},
+    {productName:'HEXA', productId:'300009', productLot:'700001', location:'Warehouse G', price:2660, quantity:890},
+    {productName:'DDL', productId:'400008', productLot:'800001', location:'Warehouse F', price:3140, quantity:980},
+    {productName:'DDL', productId:'400009', productLot:'800001', location:'Warehouse G', price:3150, quantity:990},
+    {productName:'GDL', productId:'100010', productLot:'500001', location:'Warehouse G', price:1610, quantity:620},
+    {productName:'GDL', productId:'100011', productLot:'500001', location:'Warehouse H', price:1620, quantity:630},
+    {productName:'OCTA', productId:'200010', productLot:'600001', location:'Warehouse H', price:2160, quantity:800},
+    {productName:'OCTA', productId:'200011', productLot:'600001', location:'Warehouse I', price:2170, quantity:810},
+
+    {productName:'HEXA', productId:'300010', productLot:'700001', location:'Warehouse H', price:2670, quantity:900},
+    {productName:'HEXA', productId:'300011', productLot:'700001', location:'Warehouse I', price:2680, quantity:910},
+    {productName:'DDL', productId:'400010', productLot:'800001', location:'Warehouse H', price:3160, quantity:1000},
+    {productName:'DDL', productId:'400011', productLot:'800001', location:'Warehouse I', price:3170, quantity:1010},
+    {productName:'GDL', productId:'100012', productLot:'500001', location:'Warehouse I', price:1630, quantity:640},
+    {productName:'GDL', productId:'100013', productLot:'500001', location:'Warehouse J', price:1640, quantity:650},
+    {productName:'OCTA', productId:'200012', productLot:'600001', location:'Warehouse J', price:2180, quantity:820},
+    {productName:'OCTA', productId:'200013', productLot:'600001', location:'Warehouse K', price:2190, quantity:830},
+    {productName:'HEXA', productId:'300012', productLot:'700001', location:'Warehouse J', price:2690, quantity:920},
+    {productName:'HEXA', productId:'300013', productLot:'700001', location:'Warehouse K', price:2700, quantity:930},
+  ];
+
+  let products = JSON.parse(localStorage.getItem(currentUser + '_products') || '[]');
+
+  // Save sampleProducts on first load if products are empty
+  if (products.length === 0) {
+    products = sampleProducts;
+    localStorage.setItem(currentUser + '_products', JSON.stringify(products));
+  }
 
   function saveProducts() {
-    localStorage.setItem(currentUser+'_products', JSON.stringify(products));
+    localStorage.setItem(currentUser + '_products', JSON.stringify(products));
   }
 
   function clearInputs() {
     inputs.forEach(id => {
       const el = document.getElementById(id);
-      el.value = '';
-      localStorage.removeItem(currentUser+'_product_'+id);
+      if(el) {
+        el.value = '';
+        localStorage.removeItem(currentUser + '_product_' + id);
+      }
     });
   }
 
-  function renderList(filter='') {
-    const filtered = products.filter(p => Object.values(p).join(' ').toLowerCase().includes(filter.toLowerCase()));
-    if (!filtered.length) {
-      entriesDiv.innerHTML = '<p>No products found.</p>'; return;
+  function renderList(filter = '') {
+    const filtered = products.filter(p =>
+      Object.values(p).join(' ').toLowerCase().includes(filter.toLowerCase())
+    );
+    if (filtered.length === 0) {
+      entriesDiv.innerHTML = '<p>No products found.</p>';
+      return;
     }
     let html = '<table><thead><tr>';
-    inputs.forEach(id => html += `<th>${id.replace(/([A-Z])/g,' $1')}</th>`);
+    inputs.forEach(id => html += `<th>${id.replace(/([A-Z])/g, ' $1')}</th>`);
     html += '<th>Actions</th></tr></thead><tbody>';
-    filtered.forEach((p,i) => {
+    filtered.forEach((p, i) => {
       html += '<tr>';
-      inputs.forEach(id => html += `<td>${p[id]||''}</td>`);
+      inputs.forEach(id => html += `<td>${p[id] || ''}</td>`);
       html += `<td><button data-index="${i}" class="deleteBtn">Delete</button></td></tr>`;
     });
     html += '</tbody></table>';
@@ -92,7 +166,7 @@
 
     document.querySelectorAll('.deleteBtn').forEach(btn => {
       btn.onclick = () => {
-        products.splice(btn.dataset.index,1);
+        products.splice(btn.dataset.index, 1);
         saveProducts();
         renderList(searchInput.value);
       };
@@ -102,13 +176,26 @@
   form.addEventListener('submit', e => {
     e.preventDefault();
     let valid = true;
-    const newP={};
-    inputs.forEach(id=>{
-      const v=document.getElementById(id).value.trim();
-      if ((id==='productName'||id==='productId'||id==='price')&& !v) valid=false;
-      newP[id]=v;
+    const newP = {};
+    inputs.forEach(id => {
+      const v = document.getElementById(id).value.trim();
+      if ((id === 'productName' || id === 'productId' || id === 'price') && !v) valid = false;
+      newP[id] = v;
     });
-    if (!valid){alert('Name, ID, Price are required.');return;}
+    if (!valid) {
+      alert('Name, ID, and Price are required.');
+      return;
+    }
+
+    // Check unique productId
+    if (products.some(p => p.productId === newP.productId)) {
+      alert('Product ID already exists.');
+      return;
+    }
+
+    newP.price = Number(newP.price);
+    newP.quantity = Number(newP.quantity) || 0;
+
     products.push(newP);
     saveProducts();
     renderList();
@@ -117,9 +204,9 @@
 
   searchInput.addEventListener('input', e => renderList(e.target.value));
 
-  function logout(){
+  function logout() {
     localStorage.removeItem('currentUser');
-    window.location.href='login.html';
+    window.location.href = 'login.html';
   }
 
   renderList();
