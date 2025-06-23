@@ -133,10 +133,13 @@ function clearInputs() {
 
 function renderList(filter = '') {
   const filtered = customers.filter(c => {
-    return Object.values(c).some(val =>
+  const fullName = `${c.firstName} ${c.lastName}`.toLowerCase();
+  return fullName.includes(filter.toLowerCase()) ||
+    Object.values(c).some(val =>
       String(val).toLowerCase().includes(filter.toLowerCase())
     );
-  });
+});
+
 
   if (filtered.length === 0) {
     entriesDiv.innerHTML = '<p>No customers found.</p>';
