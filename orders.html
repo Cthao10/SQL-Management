@@ -115,7 +115,7 @@
 ];
 
   // Load orders from localStorage or fallback to sample data
-  let orders = JSON.parse(localStorage.getItem(currentUser + '_orders')) || sampleOrders;
+ let orders = JSON.parse(localStorage.getItem(currentUser + '_orders')) || reducedOrders;
 
   // Save to localStorage
   function saveOrders() {
