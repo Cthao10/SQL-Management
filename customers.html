@@ -60,14 +60,29 @@ let customers = JSON.parse(localStorage.getItem(currentUser + '_customers') || '
 if (!customers) {
  customers = [  // ✅ this assigns to the outer variable
 
-  { firstName: "James", lastName: "Smith", address: "123 Main St", city: "Dallas", state: "TX", phone: "214-555-0123", email: "liam@example.com" },
-  { firstName: "Mary", lastName: "Johnson", address: "456 Oak Rd", city: "Austin", state: "TX", phone: "512-555-0456", email: "emma@example.com" },
-  { firstName: "Robert", lastName: "Williams", address: "789 Pine Dr", city: "Seattle", state: "WA", phone: "206-555-0789", email: "noah@example.com" },
-  { firstName: "Barbara", lastName: "Rodriguez", address: "321 Cedar Ln", city: "San Diego", state: "CA", phone: "858-555-0033", email: "olivia@example.com" },
-  { firstName: "Michael", lastName: "Jones", address: "654 Maple St", city: "Denver", state: "CO", phone: "303-555-0666", email: "ethan@example.com" },
-  { firstName: "Elizabeth", lastName: "Lee", address: "100 Market St", city: "San Francisco", state: "CA", phone: "415-555-1234", email: "sophia@example.com" },
-  { firstName: "Linda", lastName: "Garcia", address: "200 Ocean Ave", city: "Miami", state: "FL", phone: "305-555-5678", email: "james@example.com" }
+  customers = [
+  { firstName: "James", lastName: "Smith", address: "123 Main St", city: "Dallas", state: "TX", phone: "214-555-0123", email: "james.smith@example.com" },
+  { firstName: "Mary", lastName: "Johnson", address: "456 Oak Rd", city: "Austin", state: "TX", phone: "512-555-0456", email: "mary.johnson@example.com" },
+  { firstName: "Robert", lastName: "Williams", address: "789 Pine Dr", city: "Seattle", state: "WA", phone: "206-555-0789", email: "robert.williams@example.com" },
+  { firstName: "Patricia", lastName: "Brown", address: "321 Cedar Ln", city: "San Diego", state: "CA", phone: "858-555-0033", email: "patricia.brown@example.com" },
+  { firstName: "Michael", lastName: "Jones", address: "654 Maple St", city: "Denver", state: "CO", phone: "303-555-0666", email: "michael.jones@example.com" },
+  { firstName: "Linda", lastName: "Garcia", address: "200 Ocean Ave", city: "Miami", state: "FL", phone: "305-555-5678", email: "linda.garcia@example.com" },
+  { firstName: "William", lastName: "Martinez", address: "444 Palm St", city: "San Antonio", state: "TX", phone: "210-555-1020", email: "william.martinez@example.com" },
+  { firstName: "Barbara", lastName: "Rodriguez", address: "333 Seaside Blvd", city: "San Diego", state: "CA", phone: "619-555-8844", email: "barbara.rodriguez@example.com" },
+  { firstName: "Richard", lastName: "Wilson", address: "888 River Rd", city: "Dallas", state: "TX", phone: "972-555-2938", email: "richard.wilson@example.com" },
+  { firstName: "Elizabeth", lastName: "Lee", address: "100 Market St", city: "San Francisco", state: "CA", phone: "415-555-1234", email: "elizabeth.lee@example.com" },
+  { firstName: "Susan", lastName: "Clark", address: "505 Mission Ave", city: "Jacksonville", state: "FL", phone: "904-555-6622", email: "susan.clark@example.com" },
+  { firstName: "Joseph", lastName: "Lewis", address: "600 Forest Dr", city: "Fort Worth", state: "TX", phone: "817-555-7744", email: "joseph.lewis@example.com" },
+  { firstName: "Jessica", lastName: "Walker", address: "789 Hill St", city: "Columbus", state: "OH", phone: "614-555-7890", email: "jessica.walker@example.com" },
+  { firstName: "Thomas", lastName: "Hall", address: "400 Sunrise Ln", city: "Charlotte", state: "NC", phone: "704-555-1122", email: "thomas.hall@example.com" },
+  { firstName: "Sarah", lastName: "Allen", address: "212 Sunset Dr", city: "San Francisco", state: "CA", phone: "415-555-7788", email: "sarah.allen@example.com" },
+  { firstName: "Christopher", lastName: "Young", address: "404 Main Blvd", city: "Indianapolis", state: "IN", phone: "317-555-5566", email: "christopher.young@example.com" },
+  { firstName: "Karen", lastName: "King", address: "121 Lakeview Rd", city: "Seattle", state: "WA", phone: "206-555-9922", email: "karen.king@example.com" },
+  { firstName: "Matthew", lastName: "Wright", address: "333 Liberty St", city: "Denver", state: "CO", phone: "720-555-8899", email: "matthew.wright@example.com" },
+  { firstName: "Nancy", lastName: "Scott", address: "909 Pine Cir", city: "Washington", state: "DC", phone: "202-555-6677", email: "nancy.scott@example.com" },
+  { firstName: "James", lastName: "Smith", address: "123 Main St", city: "Boston", state: "MA", phone: "617-555-1212", email: "james.smith2@example.com" }
 ];
+
 
   localStorage.setItem(currentUser + '_customers', JSON.stringify(customers));
 }
