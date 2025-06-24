@@ -58,8 +58,6 @@ const searchInput = document.getElementById('searchInput');
 
 let customers = JSON.parse(localStorage.getItem(currentUser + '_customers') || 'null');
 if (!customers) {
- customers = [  // ✅ this assigns to the outer variable
-
   customers = [
   { firstName: "James", lastName: "Smith", address: "123 Main St", city: "Dallas", state: "TX", phone: "214-555-0123", email: "james.smith@example.com" },
   { firstName: "Mary", lastName: "Johnson", address: "456 Oak Rd", city: "Austin", state: "TX", phone: "512-555-0456", email: "mary.johnson@example.com" },
